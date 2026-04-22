@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cream: #f7f3ec;
+  --cream-2: #f1eadc;
+  --cream-3: #ece2cf;
+  --ink: #1f1b16;
+  --ink-2: #4a433b;
+  --ink-3: #8a8278;
+  --line: #e3dacb;
+  --green: #2f5d3a;
+  --green-2: #264b2f;
+  --green-3: #e6eee7;
+  --puzzle-blue: #2e6fc7;
+  --puzzle-red: #d64438;
+  --puzzle-yellow: #f5c23a;
+  --puzzle-green: #2a8b3d;
+  --brand-black: #0b0a08;
+}
+
+@layer base {
+  html {
+    color: var(--ink);
+    background: var(--cream);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display), Georgia, serif;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+
+  ::selection {
+    background: var(--green-3);
+    color: var(--green-2);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--green);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* Editorial rule */
+  hr {
+    border: 0;
+    border-top: 1px solid var(--line);
+  }
+}
+
+@layer components {
+  .section-marker {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+    text-transform: uppercase;
+  }
+
+  .prose-editorial p {
+    margin-bottom: 1em;
+  }
+  .prose-editorial p:last-child {
+    margin-bottom: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print — used for the parent-facing progress report preview */
+@media print {
+  body {
+    background: white;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-root {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .print-page {
+    box-shadow: none !important;
+    border: 0 !important;
+    margin: 0 !important;
+    padding: 18mm 16mm !important;
+    width: 100% !important;
+    min-height: auto !important;
+    page-break-after: always;
+  }
+}

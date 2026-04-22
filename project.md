@@ -1,0 +1,3 @@
+About project 
+
+Our Centre specializes in correcting Speech and Language delays, developing Self-help Skills and overcoming Behavioural Difficulties.Our programs integrate the Montessori Method of Education and proven behavioural methods in creating interventions tailored for each of our clients.This has brought about deep and  positive changes in the clients we have worked with. Fullgrace Educational Consult and Therapy is a place to come to for children who have   Speech difficulties, Autism, and Down’s Syndrome.Our program is not grueling but engaging and innovative. We  solicit and appreciate keen  commitments from our parents and guardians.
