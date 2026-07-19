@@ -11,11 +11,9 @@ const values = [
 
 export function ValuesMarquee() {
   return (
-    <div
-      aria-hidden="true"
-      className="relative overflow-hidden border-y border-line bg-cream-2 py-5"
-    >
-      <div className="flex w-max animate-marquee md:animate-marquee-slow motion-reduce:animate-none">
+    <section aria-label="What guides our work" className="relative overflow-hidden border-y border-line bg-cream-2 py-5">
+      <p className="sr-only">Our approach is Montessori-rooted, child-led, evidence-based, patient, family-inclusive and honest about progress.</p>
+      <div aria-hidden="true" className="flex w-max animate-marquee md:animate-marquee-slow motion-reduce:animate-none">
         {[...values, ...values, ...values].map((v, i) => (
           <div key={i} className="flex items-center gap-3 px-8 font-display text-2xl text-ink">
             <PuzzleDot color={v.color} size={10} />
@@ -24,6 +22,6 @@ export function ValuesMarquee() {
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

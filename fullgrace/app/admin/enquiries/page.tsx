@@ -1,9 +1,13 @@
+"use client";
+
 import Link from "next/link";
-import { enquiries, enquirySourceLabel } from "@/lib/mock";
+import { enquirySourceLabel } from "@/lib/mock";
+import { useEnquiries } from "@/lib/admin-data";
 import { formatShortDate } from "@/lib/format";
 import { Chip } from "@/components/ui/Chip";
 
 export default function EnquiriesPage() {
+  const enquiries = useEnquiries();
   const sorted = [...enquiries].sort((a, b) => b.receivedAt.localeCompare(a.receivedAt));
   return (
     <div className="space-y-6">
@@ -14,7 +18,23 @@ export default function EnquiriesPage() {
         </p>
       </header>
 
-      <div className="overflow-hidden rounded-xl border border-line bg-cream">
+      <div className="grid gap-3 md:hidden">
+        {sorted.map((enquiry, index) => (
+          <Link data-tour={index === 0 ? "enquiries-list" : undefined} key={enquiry.id} href={`/admin/enquiries/${enquiry.id}`} className="rounded-2xl border border-line bg-white p-4 shadow-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-2">
+                {enquiry.status === "new" && <span aria-label="Unread" className="h-2 w-2 shrink-0 rounded-full bg-puzzle-red" />}
+                <p className="truncate font-medium">{enquiry.payload.parentName ?? enquiry.payload.referrerName ?? "Website enquiry"}</p>
+              </div>
+              <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-ink-3">{formatShortDate(enquiry.receivedAt)}</span>
+            </div>
+            <div className="mt-3"><Chip color={enquiry.source === "form_referrer" ? "green" : enquiry.source === "form_quick" ? "blue" : "yellow"}>{enquirySourceLabel(enquiry.source)}</Chip></div>
+            <p className="mt-3 line-clamp-2 text-sm text-ink-2">{enquiry.payload.concern ?? enquiry.payload.message ?? "Open to read the full enquiry."}</p>
+          </Link>
+        ))}
+      </div>
+
+      <div className="hidden overflow-x-auto rounded-xl border border-line bg-cream md:block">
         <table className="w-full table-fixed text-left text-sm">
           <thead className="border-b border-line bg-cream-2/60 text-[11px] uppercase tracking-[0.14em] text-ink-3">
             <tr>
@@ -26,8 +46,8 @@ export default function EnquiriesPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
-            {sorted.map((e) => (
-              <tr key={e.id} className="hover:bg-cream-2/40">
+            {sorted.map((e, index) => (
+              <tr data-tour={index === 0 ? "enquiries-list" : undefined} key={e.id} className="hover:bg-cream-2/40">
                 <td className="p-3">
                   {e.status === "new" ? (
                     <span aria-label="Unread" className="inline-block h-2 w-2 rounded-full bg-puzzle-red" />

@@ -1,20 +1,22 @@
+"use client";
+
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { enquiries, enquirySourceLabel, getEnquiry, getClient } from "@/lib/mock";
+import { useState } from "react";
+import { enquirySourceLabel } from "@/lib/mock";
+import { archiveEnquiry, useClients, useEnquiries } from "@/lib/admin-data";
 import { formatDate } from "@/lib/format";
 import { Chip } from "@/components/ui/Chip";
 import { LinkButton, Button } from "@/components/ui/Button";
 import { waLink } from "@/lib/constants";
 
-export function generateStaticParams() {
-  return enquiries.map((e) => ({ id: e.id }));
-}
-
 export default function EnquiryDetail({ params }: { params: { id: string } }) {
-  const enquiry = getEnquiry(params.id);
-  if (!enquiry) notFound();
+  const enquiries = useEnquiries();
+  const { clients } = useClients();
+  const enquiry = enquiries.find((item) => item.id === params.id);
+  const [archiving, setArchiving] = useState(false);
+  if (!enquiry) return <div className="rounded-2xl border border-line bg-white p-8"><h1 className="font-display text-2xl">Loading enquiry…</h1><Link href="/admin/enquiries" className="mt-4 inline-block text-green">← Back to inbox</Link></div>;
 
-  const promotedClient = enquiry.promotedToClientId ? getClient(enquiry.promotedToClientId) : null;
+  const promotedClient = enquiry.promotedToClientId ? clients.find((item) => item.id === enquiry.promotedToClientId) : null;
   const p = enquiry.payload;
   const waMessage = waLink(
     `Hi ${p.parentName ?? p.referrerName ?? "there"} — thanks for reaching out to Fullgrace.`,
@@ -106,8 +108,8 @@ export default function EnquiryDetail({ params }: { params: { id: string } }) {
             Register as client →
           </LinkButton>
         )}
-        <Button variant="ghost" size="md">
-          {enquiry.status === "archived" ? "Archived" : "Mark as archived"}
+        <Button variant="ghost" size="md" disabled={enquiry.status === "archived" || archiving} onClick={async () => { setArchiving(true); await archiveEnquiry(enquiry.id); window.location.reload(); }}>
+          {enquiry.status === "archived" ? "Archived" : archiving ? "Archiving…" : "Mark as archived"}
         </Button>
       </section>
     </div>

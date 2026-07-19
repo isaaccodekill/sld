@@ -1,34 +1,30 @@
+"use client";
+
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import {
-  clients,
-  getClient,
-  latestArc,
-  latestSinceLast,
-  reportsFor,
-  sessionsFor,
+  sessions,
   tagLabel,
 } from "@/lib/mock";
 import { ageFromDOB, formatDate, formatShortDate, relative } from "@/lib/format";
 import { Tabs, TabList, Tab, TabPanel } from "@/components/ui/Tabs";
 import { Tag } from "@/components/ui/Tag";
 import { Chip } from "@/components/ui/Chip";
-import { LinkButton, Button } from "@/components/ui/Button";
-import { AISummaryCard } from "@/components/admin/AISummaryCard";
+import { LinkButton } from "@/components/ui/Button";
 import { SessionTimeline } from "@/components/admin/SessionTimeline";
-
-export function generateStaticParams() {
-  return clients.map((c) => ({ id: c.id }));
-}
+import { useClients, useReports } from "@/lib/admin-data";
+import { useSavedSessions } from "@/lib/admin-store";
+import type { SessionNote } from "@/lib/mock/types";
 
 export default function ClientDetail({ params }: { params: { id: string } }) {
-  const client = getClient(params.id);
-  if (!client) notFound();
+  const { clients, loading } = useClients();
+  const savedSessions = useSavedSessions();
+  const reports = useReports();
+  const client = clients.find((item) => item.id === params.id);
+  if (!client) return <div className="rounded-2xl border border-line bg-white p-8"><h1 className="font-display text-2xl">{loading ? "Loading client…" : "Client not found"}</h1><Link href="/admin/clients" className="mt-4 inline-block text-green">← Back to clients</Link></div>;
 
-  const theirSessions = sessionsFor(client.id);
-  const theirReports = reportsFor(client.id);
-  const sinceLast = latestSinceLast(client.id);
-  const arc = latestArc(client.id);
+  const theirSessions = [...sessions, ...savedSessions].filter((item) => item.clientId === client.id).sort((a, b) => b.date.localeCompare(a.date));
+  const timelineSessions: SessionNote[] = theirSessions.map((item) => ({ ...item, engagement: item.engagement as SessionNote["engagement"], tag: item.tag as SessionNote["tag"], sessionType: item.sessionType as SessionNote["sessionType"], createdAt: "createdAt" in item ? item.createdAt : item.updatedAt }));
+  const theirReports = reports.filter((item) => item.clientId === client.id);
 
   return (
     <div className="space-y-6">
@@ -91,21 +87,12 @@ export default function ClientDetail({ params }: { params: { id: string } }) {
         <TabPanel value="overview">
           <div className="grid gap-6 md:grid-cols-3">
             <div className="space-y-5 md:col-span-2">
-              <AISummaryCard summary={sinceLast} />
-              {arc && (
-                <div className="rounded-xl border border-line bg-cream">
-                  <div className="flex items-center justify-between border-b border-line px-5 py-3">
-                    <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-ink-3">
-                      <Tag tone="green">Arc summary</Tag>
-                      <span>· {formatDate(arc.windowStart)} → {formatDate(arc.windowEnd)}</span>
-                    </div>
-                    <Button variant="outline" size="sm">Regenerate</Button>
-                  </div>
-                  <div className="px-5 py-4 text-sm leading-relaxed text-ink-2">
-                    <div className="whitespace-pre-wrap">{arc.rawOutput}</div>
-                  </div>
-                </div>
-              )}
+              <div className="rounded-2xl border border-line bg-white p-5 sm:p-6">
+                <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-green">At a glance</p>
+                <h2 className="mt-2 font-display text-2xl">{theirSessions.length ? `${theirSessions.length} session${theirSessions.length === 1 ? "" : "s"} recorded` : "Ready for the first session"}</h2>
+                <p className="mt-2 text-sm text-ink-2">{theirSessions[0]?.progressNotes || "Add a session note after the next appointment to begin building a clear progress history."}</p>
+                <div className="mt-5 flex flex-wrap gap-2"><LinkButton href={`/admin/calendar`} variant="outline" size="sm">Schedule</LinkButton><LinkButton href={`/admin/sessions/new?client=${client.id}`} size="sm">Log a session</LinkButton></div>
+              </div>
             </div>
 
             <aside className="space-y-5">
@@ -168,7 +155,7 @@ export default function ClientDetail({ params }: { params: { id: string } }) {
         </TabPanel>
 
         <TabPanel value="timeline">
-          <SessionTimeline sessions={theirSessions} />
+          <SessionTimeline sessions={timelineSessions} />
         </TabPanel>
 
         <TabPanel value="reports">

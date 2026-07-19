@@ -20,9 +20,9 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Fullgrace — Speech, Self-help & Behavioural Therapy for Children",
+  title: "Fullgrace | Speech, Self-help & Behavioural Therapy for Children",
   description:
-    "A therapy and learning centre in Lagos helping children find their voice, build self-help skills, and move through difficulty with support.",
+    "Home-based therapy and learning support in Lagos, helping children find their voice, build self-help skills, and move through difficulty with care.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

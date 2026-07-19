@@ -45,7 +45,7 @@ export function WhatsAppWidget() {
                   <PuzzlePiece color="yellow" size={20} />
                 </div>
                 <div>
-                  <div className="font-display text-lg leading-tight">Hi 👋 — got a question?</div>
+                  <div className="font-display text-lg leading-tight">Hi 👋, got a question?</div>
                   <div className="mt-0.5 text-sm text-cream/85">
                     Message us and we'll reply, usually within a few hours.
                   </div>
@@ -59,15 +59,15 @@ export function WhatsAppWidget() {
             <div className="p-3">
               <div className="grid gap-2">
                 <Chip
-                  href={waLink("Hi Fullgrace — I'd like to talk about my child.")}
+                  href={waLink("Hi Fullgrace, I'd like to talk about my child.")}
                   text="I'd like to talk about my child"
                 />
                 <Chip
-                  href={waLink("Hi Fullgrace — I have a question about your programs.")}
+                  href={waLink("Hi Fullgrace, I have a question about your programs.")}
                   text="I have a question about your programs"
                 />
                 <Chip
-                  href={waLink("Hi Fullgrace —")}
+                  href={waLink("Hi Fullgrace,")}
                   text="Type your own message"
                   tone="outline"
                 />

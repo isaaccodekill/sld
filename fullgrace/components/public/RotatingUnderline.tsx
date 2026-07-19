@@ -24,7 +24,8 @@ export function RotatingUnderline({ color, children }: Props) {
           strokeWidth="2.2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          style={{ opacity: 0.9 }}
+          className="animate-draw-underline"
+          style={{ opacity: 0.9, strokeDasharray: 240, strokeDashoffset: 240 }}
         />
       </svg>
     </span>

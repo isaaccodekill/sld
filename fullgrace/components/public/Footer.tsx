@@ -16,43 +16,46 @@ import {
 export function Footer() {
   return (
     <footer className="border-t border-line bg-cream-2">
-      {/* Oversized brand moment */}
-      <div className="relative overflow-hidden bg-brandblack text-cream">
-        <div className="mx-auto max-w-wide px-5 py-24 md:px-8 md:py-36">
-          <div className="flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-cream/60">
-            <PuzzleDot color="blue" size={8} />
-            <PuzzleDot color="red" size={8} />
-            <PuzzleDot color="yellow" size={8} />
-            <PuzzleDot color="green" size={8} />
-            <span className="ml-2">Let's help</span>
-          </div>
-          <h2 className="mt-6 font-display text-[clamp(2.8rem,8vw,6.5rem)] font-medium leading-[0.98] tracking-[-0.02em]">
-            Let's help your child
-            <br />
-            find their voice.
-          </h2>
+      <div className="relative overflow-hidden bg-green text-cream">
+        <div aria-hidden className="cta-block cta-block-blue" />
+        <div aria-hidden className="cta-block cta-block-yellow" />
+        <div aria-hidden className="cta-block cta-block-red" />
 
-          <div className="mt-12 grid gap-3 md:mt-16 md:grid-cols-2 md:gap-4">
+        <div className="relative mx-auto grid max-w-wide gap-10 px-5 py-20 md:grid-cols-[minmax(0,1fr)_280px] md:items-end md:gap-16 md:px-8 md:py-24">
+          <div>
+            <div className="flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-cream/70">
+              <PuzzleDot color="blue" size={8} />
+              <PuzzleDot color="yellow" size={8} />
+              <span>One small first step</span>
+            </div>
+            <h2 className="mt-6 max-w-[12ch] font-display text-[clamp(2.7rem,6vw,5.5rem)] font-medium leading-[0.98] tracking-[-0.02em] text-cream">
+              Let's help your child find their voice.
+            </h2>
+            <p className="mt-6 max-w-[42ch] text-cream/75">
+              Start with a conversation. No referral or diagnosis is needed.
+            </p>
+          </div>
+
+          <div className="grid gap-3">
             <LinkButton
-              href={waLink("Hi Fullgrace — I'd like to chat.")}
+              href={waLink("Hi Fullgrace, I'd like to chat.")}
               target="_blank"
               rel="noopener"
               size="lg"
-              variant="primary"
-              className="justify-center"
+              variant="outline"
+              className="justify-center border-cream bg-cream text-green hover:border-cream-2 hover:bg-cream-2"
             >
               Chat on WhatsApp
             </LinkButton>
-            <LinkButton href="/contact" size="lg" variant="outline" className="justify-center border-cream/30 text-cream hover:bg-cream/10">
+            <LinkButton href="/contact" size="lg" variant="outline" className="justify-center border-cream/35 text-cream hover:border-cream/70 hover:bg-cream/10">
               Send a message
             </LinkButton>
           </div>
         </div>
       </div>
 
-      {/* Info block */}
       <div className="mx-auto max-w-wide px-5 py-12 md:px-8 md:py-16">
-        <div className="grid gap-10 md:grid-cols-[1.2fr_1fr_1fr_1fr]">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <div className="flex items-center gap-3">
               <LogoMark size={44} />
@@ -64,7 +67,7 @@ export function Footer() {
               </div>
             </div>
             <p className="mt-5 max-w-prose text-sm text-ink-2">
-              A therapy and learning centre for children with speech and language delays, autism, and
+              A home-based therapy and learning service for children with speech and language delays, autism, and
               Down's Syndrome. Montessori-rooted, child-led, family-inclusive.
             </p>
           </div>

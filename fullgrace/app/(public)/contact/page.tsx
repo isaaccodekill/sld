@@ -5,7 +5,7 @@ import { FAQ } from "@/components/public/FAQ";
 
 export const metadata: Metadata = {
   title: "Contact · Fullgrace",
-  description: "Start a conversation with us — usually a reply within one working day.",
+  description: "Start a conversation with us. We usually reply within one working day.",
 };
 
 export default function ContactPage() {
@@ -17,7 +17,7 @@ export default function ContactPage() {
           Tell us a little about your child.
         </h1>
         <p className="mt-6 max-w-prose text-md text-ink-2">
-          We reply personally to every enquiry — usually within one working day — to talk through whether we're a good
+          We reply personally to every enquiry, usually within one working day, to talk through whether we're a good
           fit. Sending a message isn't a booking; it's the start of a conversation.
         </p>
         <p className="mt-3 max-w-prose text-sm text-ink-3">

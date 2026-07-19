@@ -15,13 +15,13 @@ export default function PrivacyPage() {
           <h1 className="font-display text-[clamp(2.2rem,5vw,3.75rem)] font-medium leading-[1.04] tracking-[-0.02em]">
             How we handle your family's information.
           </h1>
-          <p className="mt-4 text-sm text-ink-3">{/* REPLACE BEFORE LAUNCH — therapist to review */}Last updated: April 2026</p>
+          <p className="mt-4 text-sm text-ink-3">{/* REPLACE BEFORE LAUNCH: therapist to review */}Last updated: April 2026</p>
 
           <div className="prose-editorial mt-10 space-y-6 text-ink-2">
             <section>
               <h2 className="font-display text-xl text-ink">What we collect</h2>
               <p>
-                When you send us a message, we collect the details you provide — your name, your contact
+                When you send us a message, we collect the details you provide, including your name, your contact
                 information, your child's first name and age, and anything you write in the message body.
                 When your child becomes a client, we also keep clinical notes from each session.
               </p>
@@ -37,7 +37,7 @@ export default function PrivacyPage() {
               <h2 className="font-display text-xl text-ink">How we use AI</h2>
               <p>
                 We use AI assistance to help the therapist synthesise session notes into progress summaries.
-                Where AI is used, only structured clinical information is shared — your contact details are
+                Where AI is used, only structured clinical information is shared. Your contact details are
                 never sent to an AI system. Every AI-generated summary is reviewed and edited by the
                 therapist before it's used in any parent-facing way.
               </p>

@@ -13,29 +13,25 @@ type Program = {
 const programs: Program[] = [
   {
     title: "Language therapy",
-    blurb:
-      "Receptive and expressive language work, articulation, early literacy. Built around play, not drills.",
+    blurb: "Communication, articulation and early literacy built through play.",
     rhythm: "Usually 2–3× per week · 45 min",
     color: "blue",
   },
   {
     title: "Behavioural intervention",
-    blurb:
-      "Structured, evidence-based work on routines, flexibility, peer interaction, and emotional regulation.",
+    blurb: "Practical support for routines, flexibility, interaction and regulation.",
     rhythm: "Usually 2× per week · 60 min",
     color: "red",
   },
   {
     title: "Self-help skills coaching",
-    blurb:
-      "Dressing, feeding, toileting, tidying up, getting ready in the morning — the skills that build independence.",
+    blurb: "Everyday skills that grow confidence and independence.",
     rhythm: "Weekly · 45 min",
     color: "yellow",
   },
   {
     title: "Parent support",
-    blurb:
-      "Dedicated time to talk through what you're seeing at home, practise strategies together, and coordinate with schools.",
+    blurb: "Simple strategies for home and joined-up support with schools.",
     rhythm: "Monthly · 30 min",
     color: "green",
   },
@@ -43,39 +39,35 @@ const programs: Program[] = [
 
 export function Programs() {
   return (
-    <section id="programs" aria-labelledby="programs-title" className="py-16 md:py-28">
-      <NumberedMarker n={4} label="Programs" color="yellow" className="mb-6 md:mb-10" />
+    <section id="programs" aria-labelledby="programs-title" className="py-14 md:py-20">
+      <NumberedMarker n={4} label="Programs" color="yellow" className="mb-6 md:mb-8" />
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between md:gap-12">
         <h2 id="programs-title" className="max-w-[22ch] font-display text-3xl font-medium leading-[1.1] tracking-[-0.02em] md:text-4xl">
-          Four steady programmes — mixed and matched for each child.
+          Small steps. Steady progress.
         </h2>
-        <p className="max-w-prose text-ink-2">
-          We don't publish prices on the site because they depend on the plan we build together.
-          The fastest way to get a clear quote is a WhatsApp message.
+        <p className="max-w-[44ch] text-ink-2">
+          We combine these programmes into one clear plan for your child.
         </p>
       </div>
 
-      <ol className="mt-12 divide-y divide-line border-t border-line">
+      <ol className="mt-10 grid gap-5 md:grid-cols-2">
         {programs.map((p, i) => (
           <Reveal as="li" key={p.title} delay={i * 0.04}>
-            <div className="grid items-start gap-5 py-8 md:grid-cols-[80px_1fr_auto] md:gap-10">
-              <div className="flex items-baseline gap-3">
+            <article className="flex h-full flex-col rounded-xl border border-line bg-cream p-6 transition-all duration-420 ease-soft hover:-translate-y-1 hover:border-green/25 hover:bg-cream-2/45 md:p-7">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
                 <span className="font-mono text-xs uppercase tracking-[0.18em] text-ink-3">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <PuzzleDot color={p.color} size={10} />
-              </div>
-              <div className="max-w-prose">
-                <h3 className="font-display text-2xl font-medium leading-tight md:text-3xl">{p.title}</h3>
-                <p className="mt-2 text-ink-2">{p.blurb}</p>
-              </div>
-              <div className="md:pt-2">
-                <div className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-3">
-                  Rhythm
                 </div>
-                <div className="mt-1 text-sm text-ink-2">{p.rhythm}</div>
+                <span className="rounded-full bg-cream-2 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-ink-3">
+                  {p.rhythm}
+                </span>
               </div>
-            </div>
+              <h3 className="mt-7 font-display text-2xl font-medium leading-tight md:text-3xl">{p.title}</h3>
+              <p className="mt-3 max-w-[42ch] text-ink-2">{p.blurb}</p>
+            </article>
           </Reveal>
         ))}
       </ol>

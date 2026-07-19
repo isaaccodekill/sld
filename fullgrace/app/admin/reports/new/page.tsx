@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useState } from "react";
-import { clients, getClient, reports } from "@/lib/mock";
+import { useClients } from "@/lib/admin-data";
 import { Select } from "@/components/ui/Select";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -16,6 +16,7 @@ export default function NewReportPage() {
 }
 
 function NewReportInner() {
+  const { clients } = useClients();
   const params = useSearchParams();
   const router = useRouter();
   const preClient = params?.get("client") ?? clients[0]?.id ?? "";
@@ -25,7 +26,7 @@ function NewReportInner() {
   const [windowStart, setWindowStart] = useState("");
   const [windowEnd, setWindowEnd] = useState(new Date().toISOString().slice(0, 10));
 
-  const client = getClient(clientId);
+  const client = clients.find((item) => item.id === clientId);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -36,22 +37,20 @@ function NewReportInner() {
       </nav>
 
       <header>
-        <h1 className="font-display text-3xl font-medium">Generate report for parent</h1>
+        <h1 className="font-display text-3xl font-medium">Create a progress report</h1>
         <p className="text-sm text-ink-2">
-          Pick a window and an occasion. You'll land in the editor with an AI-generated first draft.
-          Nothing is sent to the parent.
+          Choose the review period. A clear first draft will be built from final session notes—nothing is sent automatically.
         </p>
       </header>
 
       <form
+        data-tour="report-setup"
         onSubmit={(e) => {
           e.preventDefault();
-          // In the prototype we open the first existing report for this client as a stand-in,
-          // or fall back to the first report overall.
-          const theirs = reports.find((r) => r.clientId === clientId) ?? reports[0];
-          router.push(`/admin/reports/${theirs.id}`);
+          const query = new URLSearchParams({ client: clientId, start: windowStart || client?.startDate || "", end: windowEnd, occasion });
+          router.push(`/admin/reports/draft?${query.toString()}`);
         }}
-        className="space-y-5 rounded-xl border border-line bg-cream p-6 md:p-8"
+        className="space-y-5 rounded-xl border border-line bg-cream p-4 sm:p-6 md:p-8"
       >
         <Select
           label="Client"
@@ -82,7 +81,7 @@ function NewReportInner() {
           hint="Shapes the tone of the opening paragraph."
         />
 
-        <div className="flex justify-end gap-3 border-t border-line pt-6">
+        <div data-tour="report-draft" className="grid grid-cols-2 gap-2 border-t border-line pt-6 sm:flex sm:justify-end sm:gap-3">
           <Link href="/admin/reports" className="inline-flex items-center px-4 text-sm text-ink-3 hover:text-ink">
             Cancel
           </Link>

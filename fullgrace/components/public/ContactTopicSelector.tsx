@@ -75,7 +75,7 @@ export function ContactTopicSelector() {
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <LinkButton
-                href={waLink("Hi Fullgrace — quick question:")}
+                href={waLink("Hi Fullgrace, quick question:")}
                 target="_blank"
                 rel="noopener"
                 variant="primary"

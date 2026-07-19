@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { waLink } from "@/lib/constants";
+import { submitEnquiry } from "@/lib/admin-data";
 
 type Data = {
   parentName: string;
@@ -35,6 +36,8 @@ export function ParentEnquiryForm() {
     extra: "",
   });
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
   const reduced = useReducedMotion();
 
   const set = <K extends keyof Data>(k: K, v: Data[K]) => setData((d) => ({ ...d, [k]: v }));
@@ -45,7 +48,7 @@ export function ParentEnquiryForm() {
     <div className="rounded-xl border border-line bg-cream p-6 md:p-8">
       <div className="mb-6 flex items-center justify-between">
         <div className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-3">
-          Step {step} of 3{step === 2 && " — almost there"}
+          Step {step} of 3{step === 2 && ", almost there"}
         </div>
         <StepDots current={step} total={3} />
       </div>
@@ -164,11 +167,19 @@ export function ParentEnquiryForm() {
             Continue →
           </Button>
         ) : (
-          <Button variant="primary" size="md" onClick={() => setSent(true)}>
-            Send to Fullgrace
+          <Button variant="primary" size="md" disabled={sending} onClick={async () => {
+            if (!data.parentName || !data.email || !data.childFirstName || !data.childAge) { setError("Please complete the required fields before sending."); return; }
+            setSending(true); setError("");
+            try {
+              await submitEnquiry("form_parent", { ...data, childAge: Number(data.childAge) });
+              setSent(true);
+            } catch { setError("Your message could not be sent. Please try again or use WhatsApp."); setSending(false); }
+          }}>
+            {sending ? "Sending…" : "Send to Fullgrace"}
           </Button>
         )}
       </div>
+      {error && <p role="alert" className="mt-3 text-sm text-puzzle-red">{error}</p>}
     </div>
   );
 }
@@ -193,7 +204,7 @@ function Confirmation() {
     <div className="rounded-xl border border-line bg-cream p-8 md:p-10">
       <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-3">Message received</div>
       <h3 className="mt-3 font-display text-3xl font-medium leading-tight md:text-4xl">
-        Thank you — we'll be in touch.
+        Thank you. We'll be in touch.
       </h3>
       <p className="mt-4 max-w-prose text-ink-2">
         We reply personally to every enquiry, usually within one working day. If your message is
@@ -201,7 +212,7 @@ function Confirmation() {
       </p>
       <div className="mt-6">
         <LinkButton
-          href={waLink("Hi Fullgrace — I've just sent a form.")}
+          href={waLink("Hi Fullgrace, I've just sent a form.")}
           target="_blank"
           rel="noopener"
           variant="primary"

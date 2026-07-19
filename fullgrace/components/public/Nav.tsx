@@ -38,7 +38,7 @@ export function Nav() {
         )}
       >
         <div className="mx-auto flex h-16 max-w-wide items-center justify-between px-5 md:h-20 md:px-8">
-          <Link href="/" aria-label="Fullgrace — home" className="-my-2">
+          <Link href="/" aria-label="Fullgrace home" className="-my-2">
             <LogoLockup />
           </Link>
           <nav className="hidden items-center gap-8 md:flex">
@@ -52,7 +52,7 @@ export function Nav() {
               </Link>
             ))}
             <LinkButton
-              href={waLink("Hi Fullgrace — I'd like to chat.")}
+              href={waLink("Hi Fullgrace, I'd like to chat.")}
               target="_blank"
               rel="noopener"
               size="sm"
@@ -98,7 +98,7 @@ export function Nav() {
           </nav>
           <div className="mt-auto pb-8">
             <LinkButton
-              href={waLink("Hi Fullgrace — I'd like to chat.")}
+              href={waLink("Hi Fullgrace, I'd like to chat.")}
               target="_blank"
               rel="noopener"
               variant="primary"

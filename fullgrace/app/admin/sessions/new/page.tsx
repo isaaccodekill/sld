@@ -1,13 +1,14 @@
 "use client";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { clients, getClient } from "@/lib/mock";
+import { useClients } from "@/lib/admin-data";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { Tag } from "@/components/ui/Tag";
+import { createId, saveSession, useAppointments } from "@/lib/admin-store";
 
 export default function NewSessionPage() {
   return (
@@ -18,14 +19,20 @@ export default function NewSessionPage() {
 }
 
 function NewSessionInner() {
+  const { clients } = useClients();
   const params = useSearchParams();
-  const preClient = params?.get("client") ?? clients[0]?.id ?? "";
+  const requestedClient = params?.get("client") ?? "";
+  const preClient = requestedClient || clients[0]?.id || "";
+  const appointmentId = params?.get("appointment") ?? undefined;
+  const appointments = useAppointments();
+  const appointment = appointments.find((item) => item.id === appointmentId);
+  const draftId = useMemo(() => createId("session"), []);
 
   const [form, setForm] = useState({
     clientId: preClient,
-    date: new Date().toISOString().slice(0, 10),
-    duration: "45",
-    sessionType: "therapy",
+    date: appointment?.date ?? new Date().toISOString().slice(0, 10),
+    duration: String(appointment?.durationMinutes ?? 45),
+    sessionType: appointment?.sessionType ?? "therapy",
     focusAreas: "",
     observations: "",
     techniques: "",
@@ -38,24 +45,53 @@ function NewSessionInner() {
     setForm((f) => ({ ...f, [k]: v }));
 
   const [savedAt, setSavedAt] = useState<number | null>(null);
+  const [done, setDone] = useState(false);
+  const autosaveTimer = useRef<number | null>(null);
+
   useEffect(() => {
-    const t = window.setTimeout(() => setSavedAt(Date.now()), 1200);
-    return () => window.clearTimeout(t);
-  }, [form]);
+    if (!clients.length) return;
+    setForm((current) => {
+      const preferredClient = appointment?.clientId || requestedClient;
+      const nextClient = preferredClient && clients.some((item) => item.id === preferredClient)
+        ? preferredClient
+        : clients.some((item) => item.id === current.clientId)
+          ? current.clientId
+          : clients[0].id;
+      return {
+        ...current,
+        clientId: nextClient,
+        ...(appointment ? {
+          date: appointment.date,
+          duration: String(appointment.durationMinutes),
+          sessionType: appointment.sessionType,
+        } : {}),
+      };
+    });
+  }, [appointment, clients, requestedClient]);
+
+  useEffect(() => {
+    if (done || !form.clientId) return;
+    autosaveTimer.current = window.setTimeout(() => {
+      saveSession({ id: draftId, appointmentId, clientId: form.clientId, date: form.date, durationMinutes: Number(form.duration), sessionType: form.sessionType, focusAreas: form.focusAreas, observations: form.observations, techniques: form.techniques, engagement: Number(form.engagement), progressNotes: form.progress, nextSteps: form.nextSteps, tag: form.tag, status: "draft", updatedAt: new Date().toISOString() });
+      setSavedAt(Date.now());
+    }, 900);
+    return () => {
+      if (autosaveTimer.current) window.clearTimeout(autosaveTimer.current);
+    };
+  }, [appointmentId, done, draftId, form]);
 
   const secondsAgo = useMemo(() => {
     if (!savedAt) return null;
     return Math.round((Date.now() - savedAt) / 1000);
   }, [savedAt]);
 
-  const client = getClient(form.clientId);
+  const client = clients.find((item) => item.id === form.clientId);
 
-  const [done, setDone] = useState(false);
   if (done) {
     return (
-      <div className="mx-auto max-w-2xl rounded-xl border border-line bg-cream p-8">
-        <h1 className="font-display text-2xl">Session logged (mock).</h1>
-        <p className="mt-2 text-ink-2">In the real system this would save to the database and update the AI "since last session" summary.</p>
+      <div className="mx-auto max-w-2xl rounded-xl border border-line bg-cream p-5 sm:p-8">
+        <h1 className="font-display text-2xl">Session report finalised.</h1>
+        <p className="mt-2 text-ink-2">The report is saved and the linked appointment has been marked complete.</p>
         <div className="mt-5 flex gap-3">
           <Link href={`/admin/clients/${form.clientId}`} className="text-green hover:text-green-2">
             ← Back to client
@@ -72,7 +108,7 @@ function NewSessionInner() {
     <div className="mx-auto max-w-4xl space-y-6">
       <nav className="flex items-center justify-between text-sm">
         <Link href="/admin/sessions" className="text-ink-3 hover:text-ink">
-          ← Sessions
+          ← Session reports
         </Link>
         <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-3">
           {savedAt ? `Draft saved ${secondsAgo ?? 0}s ago` : "Draft will autosave…"}
@@ -80,7 +116,7 @@ function NewSessionInner() {
       </nav>
 
       <header>
-        <h1 className="font-display text-3xl font-medium">Log a session</h1>
+        <h1 className="font-display text-3xl font-medium">Log a session report</h1>
         {client && (
           <p className="text-sm text-ink-2">
             for <span className="text-ink">{client.firstName}</span>
@@ -89,11 +125,14 @@ function NewSessionInner() {
       </header>
 
       <form
+        data-tour="session-form"
         onSubmit={(e) => {
           e.preventDefault();
+          if (autosaveTimer.current) window.clearTimeout(autosaveTimer.current);
+          saveSession({ id: draftId, appointmentId, clientId: form.clientId, date: form.date, durationMinutes: Number(form.duration), sessionType: form.sessionType, focusAreas: form.focusAreas, observations: form.observations, techniques: form.techniques, engagement: Number(form.engagement), progressNotes: form.progress, nextSteps: form.nextSteps, tag: form.tag, status: "final", updatedAt: new Date().toISOString() });
           setDone(true);
         }}
-        className="space-y-8 rounded-xl border border-line bg-cream p-6 md:p-8"
+        className="space-y-7 rounded-xl border border-line bg-cream p-4 sm:p-6 md:p-8"
       >
         <div className="grid gap-5 md:grid-cols-3">
           <Select
@@ -107,7 +146,7 @@ function NewSessionInner() {
           <Select
             label="Session type"
             value={form.sessionType}
-            onChange={(e) => set("sessionType", e.target.value)}
+            onChange={(e) => set("sessionType", e.target.value as typeof form.sessionType)}
             options={[
               { label: "Assessment", value: "assessment" },
               { label: "Therapy", value: "therapy" },
@@ -141,7 +180,7 @@ function NewSessionInner() {
           />
           <div>
             <label className="block text-sm font-medium text-ink-2">Engagement (1–5)</label>
-            <div className="mt-2 flex items-center gap-2">
+            <div className="mt-2 flex flex-wrap items-center gap-2">
               {[1, 2, 3, 4, 5].map((n) => (
                 <button
                   key={n}
@@ -157,7 +196,7 @@ function NewSessionInner() {
                   {n}
                 </button>
               ))}
-              <span className="ml-2 font-mono text-[11px] uppercase tracking-[0.14em] text-ink-3">
+              <span className="w-full font-mono text-[11px] uppercase tracking-[0.14em] text-ink-3 sm:ml-2 sm:w-auto">
                 {
                   ["withdrawn", "reluctant", "engaged", "engaged", "highly engaged"][
                     Number(form.engagement) - 1
@@ -201,12 +240,12 @@ function NewSessionInner() {
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-line pt-6">
+        <div data-tour="session-finalize" className="grid grid-cols-2 gap-2 border-t border-line pt-6 sm:flex sm:justify-end sm:gap-3">
           <Link href="/admin/sessions" className="inline-flex items-center px-4 text-sm text-ink-3 hover:text-ink">
             Cancel
           </Link>
-          <Button type="submit" variant="primary" size="md">
-            Save session
+          <Button className="w-full sm:w-auto" type="submit" variant="primary" size="md">
+            Finalise report
           </Button>
         </div>
       </form>

@@ -6,11 +6,12 @@ import { LogoLockup } from "@/components/ui/Logo";
 import { PuzzleDot } from "@/components/ui/PuzzleDot";
 
 const items = [
-  { href: "/admin", label: "Dashboard", match: "/admin" },
-  { href: "/admin/enquiries", label: "Enquiries", match: "/admin/enquiries", badge: 3 },
+  { href: "/admin", label: "Today", match: "/admin" },
+  { href: "/admin/calendar", label: "Calendar", match: "/admin/calendar" },
+  { href: "/admin/sessions", label: "Session reports", match: "/admin/sessions" },
   { href: "/admin/clients", label: "Clients", match: "/admin/clients" },
-  { href: "/admin/sessions", label: "Sessions", match: "/admin/sessions" },
-  { href: "/admin/reports", label: "Reports", match: "/admin/reports" },
+  { href: "/admin/reports", label: "Progress reports", match: "/admin/reports" },
+  { href: "/admin/enquiries", label: "Inbox", match: "/admin/enquiries", badge: 3 },
   { href: "/admin/settings", label: "Settings", match: "/admin/settings" },
 ];
 
@@ -23,6 +24,9 @@ export function AdminSidebar({ onNavigate }: { onNavigate?: () => void }) {
         <Link href="/admin" onClick={onNavigate} className="inline-block" aria-label="Fullgrace admin">
           <LogoLockup />
         </Link>
+        <Link href="/admin/sessions/new" onClick={onNavigate} className="mt-5 flex items-center justify-between rounded-xl bg-green px-4 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-green-2">
+          <span>Log session report</span><span aria-hidden>＋</span>
+        </Link>
       </div>
       <nav className="mt-2 flex-1 px-2">
         <ul className="space-y-0.5">
@@ -34,6 +38,7 @@ export function AdminSidebar({ onNavigate }: { onNavigate?: () => void }) {
                 <Link
                   href={it.href}
                   onClick={onNavigate}
+                  data-tour={it.label === "Today" ? "today" : it.label === "Inbox" ? "inbox" : undefined}
                   className={cn(
                     "group relative flex items-center justify-between rounded-md px-3 py-2 text-sm transition-colors",
                     active
@@ -65,7 +70,7 @@ export function AdminSidebar({ onNavigate }: { onNavigate?: () => void }) {
       <div className="border-t border-line px-4 py-4 text-[11px] font-mono uppercase tracking-[0.14em] text-ink-3">
         <div className="flex items-center gap-2">
           <PuzzleDot color="green" size={6} />
-          Prototype — no backend
+          {process.env.NEXT_PUBLIC_SUPABASE_URL ? "Secure workspace" : "Local setup mode"}
         </div>
       </div>
     </aside>

@@ -1,254 +1,64 @@
-import Link from "next/link";
-import {
-  clients,
-  enquiries,
-  enquirySourceLabel,
-  getClient,
-  lastSessionDate,
-  latestSinceLast,
-  reports,
-  sessions,
-  tagLabel,
-  therapist,
-} from "@/lib/mock";
-import { formatShortDate, formatTodayLong, daysSince, ageFromDOB } from "@/lib/format";
-import { Tag } from "@/components/ui/Tag";
-import { Chip } from "@/components/ui/Chip";
-import { PuzzleDot } from "@/components/ui/PuzzleDot";
+"use client";
 
-const FOLLOWUP_DAYS = 14;
-const REPORT_DUE_WEEKS = 12;
+import Link from "next/link";
+import { therapist } from "@/lib/mock";
+import { useAppointments, useSavedSessions, updateAppointment } from "@/lib/admin-store";
+import { useClients, useEnquiries, useReports } from "@/lib/admin-data";
+import { formatTodayLong } from "@/lib/format";
+import { LinkButton } from "@/components/ui/Button";
 
 export default function AdminDashboard() {
-  const newEnquiries = enquiries.filter((e) => e.status === "new");
-  const recent = clients
-    .map((c) => ({ client: c, last: lastSessionDate(c.id) }))
-    .sort((a, b) => (b.last ?? "").localeCompare(a.last ?? ""))
-    .slice(0, 5);
-
-  const needFollowup = clients
-    .filter((c) => c.status === "active")
-    .map((c) => ({ client: c, last: lastSessionDate(c.id) }))
-    .filter(({ last }) => !last || daysSince(last) > FOLLOWUP_DAYS);
-
-  const reportsDue = clients
-    .filter((c) => c.status === "active")
-    .filter((c) => {
-      const theirReports = reports.filter((r) => r.clientId === c.id);
-      const latest = theirReports.sort((a, b) => b.generatedAt.localeCompare(a.generatedAt))[0];
-      if (!latest) return true;
-      return daysSince(latest.generatedAt) > REPORT_DUE_WEEKS * 7;
-    });
-
-  const todaySessionsCount = sessions.filter((s) => s.date === new Date().toISOString().slice(0, 10)).length;
+  const { clients } = useClients();
+  const enquiries = useEnquiries();
+  const reports = useReports();
+  const appointments = useAppointments();
+  const savedSessions = useSavedSessions();
+  const today = new Date().toLocaleDateString("en-CA");
+  const todayAppointments = appointments.filter((item) => item.date === today && item.status !== "cancelled").sort((a, b) => a.startTime.localeCompare(b.startTime));
+  const drafts = savedSessions.filter((item) => item.status === "draft");
+  const next = todayAppointments.find((item) => item.status === "scheduled");
+  const newEnquiries = enquiries.filter((item) => item.status === "new").length;
 
   return (
-    <div className="space-y-8">
-      <header className="space-y-2">
-        <div className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-3">
-          Today, {formatTodayLong()}
+    <div className="space-y-6 sm:space-y-8">
+      <header data-tour="dashboard-welcome" className="flex flex-col items-stretch gap-5 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+        <div>
+          <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-3">{formatTodayLong()}</p>
+          <h1 className="mt-1 font-display text-3xl font-medium tracking-[-0.02em] sm:text-4xl">Good morning, {therapist.name.split(" ")[0]}.</h1>
+          <p className="mt-2 text-ink-2">{todayAppointments.length ? `${todayAppointments.length} appointment${todayAppointments.length === 1 ? "" : "s"} today. Log each session report while the details are fresh.` : "Ready when you are. Log a session report or schedule the next visit."}</p>
         </div>
-        <h1 className="font-display text-4xl font-medium tracking-[-0.02em]">Welcome back, {therapist.name.split(" ")[0]}.</h1>
-        <p className="max-w-prose text-ink-2">
-          {todaySessionsCount === 0
-            ? "No sessions scheduled yet for today — a good window to catch up on notes."
-            : `${todaySessionsCount} session${todaySessionsCount === 1 ? "" : "s"} on the board today.`}
-        </p>
+        <div data-tour="dashboard-log-report" className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap"><LinkButton href="/admin/calendar" variant="outline">+ Schedule</LinkButton><LinkButton href="/admin/sessions/new" variant="primary">+ Log report</LinkButton></div>
       </header>
 
-      <div className="grid gap-5 md:grid-cols-3">
-        <StatCard label="Active clients" value={clients.filter((c) => c.status === "active").length} color="blue" />
-        <StatCard
-          label="Sessions this month"
-          value={sessions.filter((s) => s.date.startsWith(new Date().toISOString().slice(0, 7))).length}
-          color="green"
-        />
-        <StatCard label="Reports shared this quarter" value={reports.filter((r) => r.markedSharedAt).length} color="yellow" />
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Summary label="Today" value={todayAppointments.length} detail={next ? `Next at ${next.startTime}` : "No upcoming session"} />
+        <Summary label="Reports to finish" value={drafts.length} detail={drafts.length ? "Daily drafts saved safely" : "All caught up"} accent />
+        <Summary label="Progress reports" value={reports.filter((item) => !item.markedSharedAt).length} detail="Parent reports awaiting review" />
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2">
-        <section className="rounded-xl border border-line bg-cream p-5">
-          <div className="flex items-center justify-between">
-            <h2 className="font-display text-xl">New enquiries</h2>
-            <Link href="/admin/enquiries" className="text-sm text-green hover:text-green-2">
-              All enquiries →
-            </Link>
-          </div>
-          {newEnquiries.length === 0 ? (
-            <p className="mt-4 text-sm text-ink-3">You're all caught up.</p>
+      <div className="grid gap-5 lg:grid-cols-[1.55fr_.85fr]">
+        <section data-tour="dashboard-today" className="overflow-hidden rounded-2xl border border-line bg-white shadow-[0_16px_50px_rgba(23,35,45,0.04)]">
+          <div className="flex items-center justify-between border-b border-line px-5 py-4"><div><h2 className="font-display text-xl">Today’s sessions</h2><p className="text-xs text-ink-3">Your day, in order</p></div><Link href="/admin/calendar" className="text-sm font-medium text-green">View week →</Link></div>
+          {todayAppointments.length === 0 ? (
+            <div className="px-6 py-14 text-center"><div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-green-3 text-xl">✎</div><h3 className="mt-4 font-display text-xl">No scheduled sessions today</h3><p className="mt-1 text-sm text-ink-3">You can still log an unscheduled session report in one click.</p><div className="mt-5 flex flex-wrap justify-center gap-2"><LinkButton href="/admin/sessions/new" size="sm">Log session report</LinkButton><LinkButton href="/admin/calendar" variant="outline" size="sm">Schedule appointment</LinkButton></div></div>
           ) : (
-            <ul className="mt-4 divide-y divide-line">
-              {newEnquiries.slice(0, 4).map((e) => (
-                <li key={e.id}>
-                  <Link href={`/admin/enquiries/${e.id}`} className="flex items-start gap-3 py-3 hover:bg-cream-2/60">
-                    <span aria-hidden className="mt-2 h-2 w-2 shrink-0 rounded-full bg-puzzle-red" />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Chip color={e.source === "form_referrer" ? "green" : e.source === "form_quick" ? "blue" : "yellow"}>
-                          {enquirySourceLabel(e.source)}
-                        </Chip>
-                        <span className="text-sm text-ink">
-                          {e.payload.parentName ?? e.payload.referrerName}
-                        </span>
-                        {e.payload.childFirstName && (
-                          <span className="text-xs text-ink-3">
-                            · {e.payload.childFirstName} ({e.payload.childAge})
-                          </span>
-                        )}
-                      </div>
-                      <p className="mt-1 line-clamp-2 text-sm text-ink-2">
-                        {e.payload.concern ?? e.payload.message}
-                      </p>
-                    </div>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-3">
-                      {formatShortDate(e.receivedAt)}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <ol className="divide-y divide-line">
+              {todayAppointments.map((appointment) => {
+                const client = clients.find((item) => item.id === appointment.clientId);
+                return <li key={appointment.id} className="grid grid-cols-[52px_1fr] items-center gap-3 px-4 py-4 sm:grid-cols-[64px_1fr_auto] sm:gap-4 sm:px-5"><div className="font-display text-lg text-ink">{appointment.startTime}</div><div><div className="font-medium">{client?.firstName}</div><div className="text-xs capitalize text-ink-3">{appointment.sessionType.replace("_", " ")} · {appointment.durationMinutes} minutes</div></div><div className="col-span-2 flex items-center gap-2 sm:col-span-1">{appointment.status === "scheduled" ? <><LinkButton href={`/admin/sessions/new?client=${appointment.clientId}&appointment=${appointment.id}`} size="sm">Log report</LinkButton><button onClick={() => updateAppointment(appointment.id, { status: "no_show" })} className="min-h-9 px-2 text-xs text-ink-3 hover:text-ink">No-show</button></> : <span className="rounded-full bg-[#E8F4EC] px-3 py-1 text-xs font-medium text-puzzle-green">Completed</span>}</div></li>;
+              })}
+            </ol>
           )}
         </section>
 
-        <section className="rounded-xl border border-line bg-cream p-5">
-          <div className="flex items-center justify-between">
-            <h2 className="font-display text-xl">Recent clients</h2>
-            <Link href="/admin/clients" className="text-sm text-green hover:text-green-2">
-              All clients →
-            </Link>
-          </div>
-          <ul className="mt-4 divide-y divide-line">
-            {recent.map(({ client: c, last }) => {
-              const sum = latestSinceLast(c.id);
-              return (
-                <li key={c.id}>
-                  <Link href={`/admin/clients/${c.id}`} className="block py-3 hover:bg-cream-2/60">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <ClientAvatar name={c.firstName} />
-                        <div>
-                          <div className="text-sm font-medium text-ink">
-                            {c.firstName} <span className="text-ink-3">· age {ageFromDOB(c.dob)}</span>
-                          </div>
-                          <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3">
-                            {c.tags.map(tagLabel).join(" · ")}
-                          </div>
-                        </div>
-                      </div>
-                      <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-3">
-                        {last ? formatShortDate(last) : "no sessions"}
-                      </span>
-                    </div>
-                    {sum && (
-                      <p className="mt-2 line-clamp-2 rounded-md bg-cream-2/60 p-2 text-xs text-ink-2">
-                        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3">
-                          Since last ·
-                        </span>{" "}
-                        {sum.editedOutput ?? sum.rawOutput}
-                      </p>
-                    )}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      </div>
-
-      <div className="grid gap-5 md:grid-cols-2">
-        <section className="rounded-xl border border-line bg-cream p-5">
-          <div className="flex items-center justify-between">
-            <h2 className="font-display text-xl">Needs follow-up</h2>
-            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3">
-              {">"} {FOLLOWUP_DAYS} days
-            </span>
-          </div>
-          {needFollowup.length === 0 ? (
-            <p className="mt-4 text-sm text-ink-3">No one is overdue — nice work.</p>
-          ) : (
-            <ul className="mt-4 space-y-2">
-              {needFollowup.map(({ client: c, last }) => (
-                <li key={c.id}>
-                  <Link
-                    href={`/admin/clients/${c.id}`}
-                    className="flex items-center justify-between rounded-md p-2 hover:bg-cream-2/60"
-                  >
-                    <div className="flex items-center gap-3">
-                      <PuzzleDot color="yellow" size={8} />
-                      <span className="text-sm text-ink">{c.firstName}</span>
-                      <span className="text-xs text-ink-3">{c.tags.map(tagLabel).join(", ")}</span>
-                    </div>
-                    <span className="text-xs text-ink-3">
-                      {last ? `${daysSince(last)} days ago` : "no sessions"}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        <section className="rounded-xl border border-line bg-cream p-5">
-          <div className="flex items-center justify-between">
-            <h2 className="font-display text-xl">Reports due</h2>
-            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3">
-              {">"} {REPORT_DUE_WEEKS} weeks
-            </span>
-          </div>
-          {reportsDue.length === 0 ? (
-            <p className="mt-4 text-sm text-ink-3">Everyone's up to date.</p>
-          ) : (
-            <ul className="mt-4 space-y-2">
-              {reportsDue.map((c) => (
-                <li key={c.id}>
-                  <Link
-                    href={`/admin/clients/${c.id}`}
-                    className="flex items-center justify-between rounded-md p-2 hover:bg-cream-2/60"
-                  >
-                    <div className="flex items-center gap-3">
-                      <PuzzleDot color="blue" size={8} />
-                      <span className="text-sm text-ink">{c.firstName}</span>
-                    </div>
-                    <Tag tone="neutral">Nudge</Tag>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+        <aside className="space-y-5">
+          <section data-tour="dashboard-actions" className="rounded-2xl border border-line bg-green-3/60 p-5"><p className="font-mono text-[10px] uppercase tracking-[0.14em] text-green-2">Quick actions</p><div className="mt-4 grid gap-2"><QuickLink href="/admin/sessions/new" title="Log a session report" subtitle="Daily report · autosaves while you type" primary /><QuickLink href="/admin/calendar" title="Schedule an appointment" subtitle="Choose a client and time" /><QuickLink href="/admin/reports/new" title="Create a progress report" subtitle="Periodic parent-facing summary" /></div></section>
+          <section className="rounded-2xl border border-line bg-white p-5"><div className="flex items-center justify-between"><h2 className="font-display text-lg">Needs attention</h2><span className="h-2 w-2 rounded-full bg-puzzle-yellow" /></div><div className="mt-4 divide-y divide-line text-sm"><Link href="/admin/enquiries" className="flex justify-between py-3"><span>New enquiries</span><strong>{newEnquiries}</strong></Link><Link href="/admin/reports" className="flex justify-between py-3"><span>Reports in draft</span><strong>{reports.filter((item) => !item.markedSharedAt).length}</strong></Link><Link href="/admin/clients" className="flex justify-between py-3"><span>Active clients</span><strong>{clients.filter((item) => item.status === "active").length}</strong></Link></div></section>
+        </aside>
       </div>
     </div>
   );
 }
 
-function StatCard({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: number;
-  color: "blue" | "yellow" | "green";
-}) {
-  return (
-    <div className="rounded-xl border border-line bg-cream p-5">
-      <div className="flex items-center gap-2">
-        <PuzzleDot color={color} size={8} />
-        <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-3">{label}</span>
-      </div>
-      <div className="mt-3 font-display text-4xl font-medium tracking-tight">{value}</div>
-    </div>
-  );
-}
-
-function ClientAvatar({ name }: { name: string }) {
-  const initials = name.slice(0, 1);
-  return (
-    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-3 font-display text-sm text-green-2">
-      {initials}
-    </div>
-  );
-}
-
-// Import used outside — silence lint-unused since getClient isn't used directly here but kept for future.
-void getClient;
+function Summary({ label, value, detail, accent = false }: { label: string; value: number; detail: string; accent?: boolean }) { return <div className={`rounded-2xl border p-5 ${accent ? "border-puzzle-yellow/30 bg-puzzle-yellow/10" : "border-line bg-white"}`}><div className="flex items-end justify-between"><span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3">{label}</span><strong className="font-display text-3xl font-medium">{value}</strong></div><p className="mt-3 text-xs text-ink-3">{detail}</p></div>; }
+function QuickLink({ href, title, subtitle, primary = false }: { href: string; title: string; subtitle: string; primary?: boolean }) { return <Link href={href} className={`group rounded-xl border p-3 transition ${primary ? "border-green/20 bg-green text-white shadow-sm hover:bg-green-2" : "border-transparent bg-white/75 hover:border-green/20 hover:bg-white"}`}><div className="flex items-center justify-between text-sm font-medium"><span>{title}</span><span className={`transition-transform group-hover:translate-x-0.5 ${primary ? "text-white" : "text-green"}`}>→</span></div><p className={`mt-0.5 text-xs ${primary ? "text-white/75" : "text-ink-3"}`}>{subtitle}</p></Link>; }

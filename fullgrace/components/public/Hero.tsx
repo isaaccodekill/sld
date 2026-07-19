@@ -2,6 +2,7 @@ import { NumberedMarker } from "@/components/ui/NumberedMarker";
 import { LinkButton } from "@/components/ui/Button";
 import { RotatingUnderline } from "./RotatingUnderline";
 import { waLink } from "@/lib/constants";
+import { PuzzleDot } from "@/components/ui/PuzzleDot";
 
 export function Hero() {
   return (
@@ -11,21 +12,23 @@ export function Hero() {
         id="hero-title"
         className="font-display text-[clamp(2.4rem,6.2vw,5rem)] font-medium leading-[1.02] tracking-[-0.02em] text-ink"
       >
-        Hi, we're Fullgrace — a therapy and learning centre in Lagos helping children{" "}
-        <RotatingUnderline color="blue">find their voice</RotatingUnderline>, build{" "}
-        <RotatingUnderline color="yellow">self-help skills</RotatingUnderline>, and move through{" "}
-        <RotatingUnderline color="red">difficulty</RotatingUnderline> with support.
+        Every child deserves to be <RotatingUnderline color="blue">understood.</RotatingUnderline>
       </h1>
 
-      <p className="mt-8 max-w-prose text-md text-ink-2 md:mt-10">
-        We work with children who have speech and language delays, autism, and Down's Syndrome.
-        Our programmes blend the Montessori method with evidence-based behavioural interventions,
-        and we design each one around the child in front of us — not the label.
+      <p className="mt-7 max-w-[58ch] text-md text-ink-2 md:mt-8">
+        Speech, self-help and behavioural therapy shaped around the child, not the diagnosis.
+        Montessori-rooted, family-inclusive and based in Lagos.
       </p>
+
+      <div className="mt-6 flex flex-wrap gap-2.5" aria-label="Our areas of support">
+        <FocusChip label="Speech & language" color="blue" />
+        <FocusChip label="Self-help skills" color="yellow" />
+        <FocusChip label="Behavioural support" color="red" />
+      </div>
 
       <div className="mt-8 flex flex-wrap gap-3 md:mt-10">
         <LinkButton
-          href={waLink("Hi Fullgrace — I'd like to chat about my child.")}
+          href={waLink("Hi Fullgrace, I'd like to chat about my child.")}
           target="_blank"
           rel="noopener"
           variant="primary"
@@ -44,6 +47,15 @@ export function Hero() {
         <Stat number="1:1" label="always" color="green" />
       </div>
     </section>
+  );
+}
+
+function FocusChip({ label, color }: { label: string; color: "blue" | "yellow" | "red" }) {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full border border-line bg-cream-2/60 px-3.5 py-2 text-sm text-ink-2 transition-transform duration-420 ease-soft hover:-translate-y-0.5">
+      <PuzzleDot color={color} size={8} />
+      {label}
+    </span>
   );
 }
 

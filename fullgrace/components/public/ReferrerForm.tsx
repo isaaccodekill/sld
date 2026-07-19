@@ -3,9 +3,12 @@ import { useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
+import { submitEnquiry } from "@/lib/admin-data";
 
 export function ReferrerForm() {
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
   const [data, setData] = useState({
     name: "",
     organisation: "",
@@ -21,9 +24,9 @@ export function ReferrerForm() {
     return (
       <div className="rounded-xl border border-line bg-cream p-8">
         <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-3">Message received</div>
-        <h3 className="mt-3 font-display text-3xl">Thank you — Awele will be in touch.</h3>
+        <h3 className="mt-3 font-display text-3xl">Thank you. Awele will be in touch.</h3>
         <p className="mt-3 max-w-prose text-ink-2">
-          We'll reply within a working day with next steps. If the matter is urgent, please call the centre directly.
+          We'll reply within a working day with next steps. If the matter is urgent, please call us directly.
         </p>
       </div>
     );
@@ -31,9 +34,13 @@ export function ReferrerForm() {
 
   return (
     <form
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault();
-        setSent(true);
+        setSending(true); setError("");
+        try {
+          await submitEnquiry("form_referrer", { referrerName: data.name, organisation: data.organisation, role: data.role, phone: data.phone, email: data.email, message: data.message });
+          setSent(true);
+        } catch { setError("Your referral could not be sent. Please try again."); setSending(false); }
       }}
       className="rounded-xl border border-line bg-cream p-6 md:p-8"
     >
@@ -65,10 +72,11 @@ export function ReferrerForm() {
         />
       </div>
       <div className="mt-6 flex justify-end border-t border-line pt-6">
-        <Button type="submit" variant="primary" size="md">
-          Send to Fullgrace
+        <Button type="submit" variant="primary" size="md" disabled={sending}>
+          {sending ? "Sending…" : "Send to Fullgrace"}
         </Button>
       </div>
+      {error && <p role="alert" className="mt-3 text-sm text-puzzle-red">{error}</p>}
     </form>
   );
 }

@@ -1,19 +1,39 @@
+"use client";
+
 import Link from "next/link";
-import { clients, getClient, reports } from "@/lib/mock";
+import { useClients, useReports } from "@/lib/admin-data";
 import { formatDate, relative } from "@/lib/format";
 import { Tag } from "@/components/ui/Tag";
 
 export default function ReportsPage() {
+  const { clients } = useClients();
+  const reports = useReports();
   const sorted = [...reports].sort((a, b) => b.generatedAt.localeCompare(a.generatedAt));
 
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-display text-3xl font-medium">Reports</h1>
-        <p className="text-sm text-ink-2">Every parent-facing progress report, across all clients.</p>
+        <h1 className="font-display text-3xl font-medium">Progress reports</h1>
+        <p className="text-sm text-ink-2">Periodic parent-facing summaries built from final daily session reports.</p>
       </header>
 
-      <div className="overflow-hidden rounded-xl border border-line bg-cream">
+      <div className="grid gap-3 md:hidden">
+        {sorted.map((report) => {
+          const client = clients.find((item) => item.id === report.clientId);
+          return (
+            <Link key={report.id} href={`/admin/reports/${report.id}`} className="rounded-2xl border border-line bg-white p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0"><p className="truncate font-medium">{client?.firstName ?? "Client"}</p><p className="mt-1 text-xs text-ink-3">{formatDate(report.windowStart)} → {formatDate(report.windowEnd)}</p></div>
+                <Tag tone={report.markedSharedAt ? "good" : "warn"}>{report.markedSharedAt ? "Shared" : "Draft"}</Tag>
+              </div>
+              <p className="mt-4 text-sm text-ink-2">{report.occasionNote ?? "Progress review"}</p>
+              <p className="mt-2 text-xs text-ink-3">Created {relative(report.generatedAt)}</p>
+            </Link>
+          );
+        })}
+      </div>
+
+      <div className="hidden overflow-x-auto rounded-xl border border-line bg-cream md:block">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-line bg-cream-2/60 text-[11px] uppercase tracking-[0.14em] text-ink-3">
             <tr>
@@ -27,7 +47,7 @@ export default function ReportsPage() {
           </thead>
           <tbody className="divide-y divide-line">
             {sorted.map((r) => {
-              const c = getClient(r.clientId);
+              const c = clients.find((item) => item.id === r.clientId);
               return (
                 <tr key={r.id} className="hover:bg-cream-2/40">
                   <td className="p-3 font-medium text-ink">{c?.firstName}</td>
@@ -64,8 +84,6 @@ export default function ReportsPage() {
         </Link>{" "}
         and click <em>Generate report for parent</em>.
       </div>
-      {/* keep clients import used */}
-      <div className="sr-only">{clients.length}</div>
     </div>
   );
 }
