@@ -3,8 +3,9 @@ import { NumberedMarker } from "@/components/ui/NumberedMarker";
 import { BUSINESS_EMAIL, BUSINESS_NAME } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Privacy · Fullgrace",
+  title: "Privacy",
   description: "How Fullgrace stores and protects your family's information.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {

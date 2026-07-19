@@ -73,7 +73,7 @@ export function Footer() {
           </div>
 
           <div>
-            <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-3">Visit</div>
+            <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-3">Home visits</div>
             <div className="mt-3 text-sm text-ink-2">
               {BUSINESS_ADDRESS_LINE_1}
               <br />

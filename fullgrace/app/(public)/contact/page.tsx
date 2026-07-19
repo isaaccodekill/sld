@@ -4,8 +4,9 @@ import { ContactTopicSelector } from "@/components/public/ContactTopicSelector";
 import { FAQ } from "@/components/public/FAQ";
 
 export const metadata: Metadata = {
-  title: "Contact · Fullgrace",
-  description: "Start a conversation with us. We usually reply within one working day.",
+  title: "Contact",
+  description: "Ask about home-based child speech, behavioural and learning support in Lagos. Fullgrace usually replies within one working day.",
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {

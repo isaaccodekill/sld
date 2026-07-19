@@ -39,9 +39,8 @@ export function Team() {
           </h2>
           <div className="prose-editorial mt-6 max-w-prose text-ink-2">
             <p>
-              {/* REPLACE BEFORE LAUNCH: first-person founder bio */}
               I founded Fullgrace after years of seeing how much a patient plan and a carefully
-              prepared room could change for a child. Montessori helps me see the whole child;
+              prepared home environment could change for a child. Montessori helps me see the whole child;
               behavioural practice gives us tools for steady progress.
             </p>
             <p>

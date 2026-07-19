@@ -1,10 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  sessions,
-  tagLabel,
-} from "@/lib/mock";
+import { tagLabel } from "@/lib/mock";
 import { ageFromDOB, formatDate, formatShortDate, relative } from "@/lib/format";
 import { Tabs, TabList, Tab, TabPanel } from "@/components/ui/Tabs";
 import { Tag } from "@/components/ui/Tag";
@@ -22,8 +19,8 @@ export default function ClientDetail({ params }: { params: { id: string } }) {
   const client = clients.find((item) => item.id === params.id);
   if (!client) return <div className="rounded-2xl border border-line bg-white p-8"><h1 className="font-display text-2xl">{loading ? "Loading client…" : "Client not found"}</h1><Link href="/admin/clients" className="mt-4 inline-block text-green">← Back to clients</Link></div>;
 
-  const theirSessions = [...sessions, ...savedSessions].filter((item) => item.clientId === client.id).sort((a, b) => b.date.localeCompare(a.date));
-  const timelineSessions: SessionNote[] = theirSessions.map((item) => ({ ...item, engagement: item.engagement as SessionNote["engagement"], tag: item.tag as SessionNote["tag"], sessionType: item.sessionType as SessionNote["sessionType"], createdAt: "createdAt" in item ? item.createdAt : item.updatedAt }));
+  const theirSessions = savedSessions.filter((item) => item.clientId === client.id).sort((a, b) => b.date.localeCompare(a.date));
+  const timelineSessions: SessionNote[] = theirSessions.map((item) => ({ ...item, engagement: item.engagement as SessionNote["engagement"], tag: item.tag as SessionNote["tag"], sessionType: item.sessionType as SessionNote["sessionType"], createdAt: item.updatedAt }));
   const theirReports = reports.filter((item) => item.clientId === client.id);
 
   return (

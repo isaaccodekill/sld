@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { sessions } from "@/lib/mock";
 import { useClients } from "@/lib/admin-data";
 import { useSavedSessions } from "@/lib/admin-store";
 import { formatDate } from "@/lib/format";
@@ -11,8 +10,7 @@ import { LinkButton } from "@/components/ui/Button";
 export default function SessionsPage() {
   const { clients } = useClients();
   const saved = useSavedSessions();
-  const combined = [...saved, ...sessions.map((item) => ({ ...item, status: "final" as const, updatedAt: item.createdAt }))]
-    .sort((a, b) => b.date.localeCompare(a.date));
+  const combined = [...saved].sort((a, b) => b.date.localeCompare(a.date));
 
   return (
     <div className="space-y-6">

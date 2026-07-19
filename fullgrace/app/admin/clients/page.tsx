@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { sessions, tagLabel } from "@/lib/mock";
+import { tagLabel } from "@/lib/mock";
 import { ageFromDOB, formatShortDate, relative } from "@/lib/format";
 import { Tag } from "@/components/ui/Tag";
 import { LinkButton } from "@/components/ui/Button";
@@ -19,7 +19,7 @@ export default function ClientsPage() {
   const { clients, loading } = useClients();
   const savedSessions = useSavedSessions();
   const rows = clients
-    .map((c) => ({ c, last: [...sessions, ...savedSessions].filter((item) => item.clientId === c.id).sort((a, b) => b.date.localeCompare(a.date))[0]?.date }))
+    .map((c) => ({ c, last: savedSessions.filter((item) => item.clientId === c.id).sort((a, b) => b.date.localeCompare(a.date))[0]?.date }))
     .sort((a, b) => (b.last ?? "").localeCompare(a.last ?? ""));
 
   return (

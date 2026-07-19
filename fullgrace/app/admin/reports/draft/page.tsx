@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { sessions } from "@/lib/mock";
 import { saveReportDraft, useClients } from "@/lib/admin-data";
 import { useSavedSessions } from "@/lib/admin-store";
 import { Button } from "@/components/ui/Button";
@@ -24,7 +23,7 @@ function DraftReport() {
   const occasion = params.get("occasion") ?? "Progress review";
   const client = clients.find((item) => item.id === clientId);
   const included = useMemo(
-    () => [...sessions, ...saved].filter((item) => item.clientId === clientId && (!start || item.date >= start) && item.date <= end).sort((a, b) => a.date.localeCompare(b.date)),
+    () => saved.filter((item) => item.clientId === clientId && (!start || item.date >= start) && item.date <= end).sort((a, b) => a.date.localeCompare(b.date)),
     [clientId, end, saved, start],
   );
   const focus = Array.from(new Set(included.flatMap((item) => item.focusAreas.split(",").map((value) => value.trim()).filter(Boolean)))).slice(0, 5);
@@ -64,13 +63,13 @@ function DraftReport() {
           <Textarea label="Ideas for home" rows={5} value={form.home} onChange={(e) => set("home", e.target.value)} />
         </form>
         <article className="min-h-[850px] rounded-2xl border border-line bg-white p-5 shadow-[0_18px_60px_rgba(23,35,45,0.06)] sm:p-8 md:p-12 print:border-0 print:p-0 print:shadow-none">
-          <div className="border-b border-line pb-7"><p className="font-mono text-[10px] uppercase tracking-[0.16em] text-green">Fullgrace Children Therapy Centre</p><h2 className="mt-3 font-display text-4xl">{form.title}</h2><div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm text-ink-2"><span><strong>Child:</strong> {client?.firstName}</span><span><strong>Period:</strong> {start || client?.startDate} – {end}</span></div></div>
+          <div className="border-b border-line pb-7"><p className="font-mono text-[10px] uppercase tracking-[0.16em] text-green">Fullgrace Therapy &amp; Learning</p><h2 className="mt-3 font-display text-4xl">{form.title}</h2><div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm text-ink-2"><span><strong>Child:</strong> {client?.firstName}</span><span><strong>Period:</strong> {start || client?.startDate} – {end}</span></div></div>
           <section className="report-section"><p>{form.opening}</p></section>
           <section className="report-section"><h3>What we have been working on</h3>{focus.length ? <ul>{focus.map((item) => <li key={item}>{item}</li>)}</ul> : <p className="text-ink-3">Add focus areas in the session notes to populate this section.</p>}</section>
           <section className="report-section"><h3>Progress we are noticing</h3><p>{form.noticing}</p></section>
           <section className="report-section"><h3>Ideas for home</h3><p>{form.home}</p></section>
           <section className="report-section"><h3>What comes next</h3><p>{form.nextSteps}</p></section>
-          <footer className="mt-12 border-t border-line pt-5 text-xs text-ink-3">Prepared with care by Fullgrace Children Therapy Centre.</footer>
+          <footer className="mt-12 border-t border-line pt-5 text-xs text-ink-3">Prepared with care by Fullgrace Therapy &amp; Learning.</footer>
         </article>
       </div>
     </div>
