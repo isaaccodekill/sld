@@ -98,7 +98,7 @@ function NewClientInner() {
           <div className="grid gap-5 md:grid-cols-2">
             <Input label="First name" required value={form.firstName} onChange={(e) => set("firstName", e.target.value)} />
             <Input label="Nickname" value={form.nickname} onChange={(e) => set("nickname", e.target.value)} />
-            <Input label="Date of birth" type="date" value={form.dob} onChange={(e) => set("dob", e.target.value)} />
+            <Input label="Date of birth" type="date" required max={new Date().toISOString().slice(0, 10)} value={form.dob} onChange={(e) => set("dob", e.target.value)} />
             <Input label="Start date" type="date" value={form.startDate} onChange={(e) => set("startDate", e.target.value)} />
           </div>
         </Section>

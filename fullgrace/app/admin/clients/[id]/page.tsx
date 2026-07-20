@@ -22,6 +22,7 @@ export default function ClientDetail({ params }: { params: { id: string } }) {
   const theirSessions = savedSessions.filter((item) => item.clientId === client.id).sort((a, b) => b.date.localeCompare(a.date));
   const timelineSessions: SessionNote[] = theirSessions.map((item) => ({ ...item, engagement: item.engagement as SessionNote["engagement"], tag: item.tag as SessionNote["tag"], sessionType: item.sessionType as SessionNote["sessionType"], createdAt: item.updatedAt }));
   const theirReports = reports.filter((item) => item.clientId === client.id);
+  const clientAge = ageFromDOB(client.dob);
 
   return (
     <div className="space-y-6">
@@ -41,7 +42,7 @@ export default function ClientDetail({ params }: { params: { id: string } }) {
               {client.firstName} {client.nickname && <span className="text-ink-3">"{client.nickname}"</span>}
             </h1>
             <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-ink-2">
-              <span>Age {ageFromDOB(client.dob)} · born {formatDate(client.dob)}</span>
+              <span>{clientAge === null ? "Date of birth not recorded" : `Age ${clientAge} · born ${formatDate(client.dob)}`}</span>
               <span className="text-ink-3">·</span>
               <span>Started {formatDate(client.startDate)}</span>
               <span className="text-ink-3">·</span>

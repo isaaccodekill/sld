@@ -2,6 +2,7 @@ import Link from "next/link";
 import { LogoMark } from "@/components/ui/Logo";
 import { LinkButton } from "@/components/ui/Button";
 import { PuzzleDot } from "@/components/ui/PuzzleDot";
+import { RotatingUnderline } from "@/components/public/RotatingUnderline";
 import {
   BUSINESS_ADDRESS_LINE_1,
   BUSINESS_ADDRESS_LINE_2,
@@ -29,7 +30,7 @@ export function Footer() {
               <span>One small first step</span>
             </div>
             <h2 className="mt-6 max-w-[12ch] font-display text-[clamp(2.7rem,6vw,5.5rem)] font-medium leading-[0.98] tracking-[-0.02em] text-cream">
-              Let's help your child find their voice.
+              Let's help your child <RotatingUnderline color="cream" delay={0.12}>find their voice.</RotatingUnderline>
             </h2>
             <p className="mt-6 max-w-[42ch] text-cream/75">
               Start with a conversation. No referral or diagnosis is needed.

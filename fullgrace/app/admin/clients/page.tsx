@@ -15,6 +15,11 @@ function statusTone(s: string): "good" | "warn" | "admin" {
   return "admin";
 }
 
+function ageLabel(dob: string): string {
+  const age = ageFromDOB(dob);
+  return age === null ? "DOB not recorded" : `age ${age}`;
+}
+
 export default function ClientsPage() {
   const { clients, loading } = useClients();
   const savedSessions = useSavedSessions();
@@ -45,7 +50,7 @@ export default function ClientsPage() {
             <div className="flex items-start justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-3 font-display text-green-2">{c.firstName[0]}</div>
-                <div className="min-w-0"><div className="truncate font-medium">{c.firstName} · age {ageFromDOB(c.dob)}</div><div className="truncate text-xs text-ink-3">{c.parentName}</div></div>
+                <div className="min-w-0"><div className="truncate font-medium">{c.firstName} · {ageLabel(c.dob)}</div><div className="truncate text-xs text-ink-3">{c.parentName}</div></div>
               </div>
               <Tag tone={statusTone(c.status)}>{c.status}</Tag>
             </div>
@@ -76,7 +81,7 @@ export default function ClientsPage() {
                     <div>
                       <div className="font-medium text-ink">
                         {c.firstName}{" "}
-                        <span className="text-ink-3">· age {ageFromDOB(c.dob)}</span>
+                        <span className="text-ink-3">· {ageLabel(c.dob)}</span>
                       </div>
                       <div className="text-xs text-ink-3">{c.parentName}</div>
                     </div>

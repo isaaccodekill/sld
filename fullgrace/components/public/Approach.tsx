@@ -1,6 +1,7 @@
 import { NumberedMarker } from "@/components/ui/NumberedMarker";
 import { Reveal } from "@/components/ui/Reveal";
 import { BuildingBlocksScene } from "@/components/public/BuildingBlocksScene";
+import { RotatingUnderline } from "@/components/public/RotatingUnderline";
 
 export function Approach() {
   return (
@@ -14,7 +15,7 @@ export function Approach() {
 
         <Reveal delay={0.06}>
           <h2 id="approach-title" className="font-display text-3xl font-medium leading-[1.1] tracking-[-0.02em] md:text-4xl">
-            Child-led. Carefully structured.
+            Child-led. Carefully <RotatingUnderline color="red" delay={0.12}>structured.</RotatingUnderline>
           </h2>
           <div className="prose-editorial mt-6 max-w-prose text-base text-ink-2 md:text-md">
             <p>

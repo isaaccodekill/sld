@@ -2,6 +2,7 @@ import type { PuzzleColor } from "@/lib/tokens";
 import { NumberedMarker } from "@/components/ui/NumberedMarker";
 import { PuzzleDot } from "@/components/ui/PuzzleDot";
 import { Reveal } from "@/components/ui/Reveal";
+import { RotatingUnderline } from "@/components/public/RotatingUnderline";
 
 type Program = {
   title: string;
@@ -43,7 +44,7 @@ export function Programs() {
       <NumberedMarker n={4} label="Programs" color="yellow" className="mb-6 md:mb-8" />
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between md:gap-12">
         <h2 id="programs-title" className="max-w-[22ch] font-display text-3xl font-medium leading-[1.1] tracking-[-0.02em] md:text-4xl">
-          Small steps. Steady progress.
+          Small steps. <RotatingUnderline color="yellow" delay={0.08}>Steady progress.</RotatingUnderline>
         </h2>
         <p className="max-w-[44ch] text-ink-2">
           We combine these programmes into one clear plan for your child.

@@ -1,10 +1,18 @@
-export function formatDate(date: Date | string, opts?: Intl.DateTimeFormatOptions): string {
-  const d = typeof date === "string" ? new Date(date) : date;
+function validDate(date: Date | string | null | undefined): Date | null {
+  if (!date) return null;
+  const parsed = typeof date === "string" ? new Date(date) : date;
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+export function formatDate(date: Date | string | null | undefined, opts?: Intl.DateTimeFormatOptions): string {
+  const d = validDate(date);
+  if (!d) return "—";
   return new Intl.DateTimeFormat("en-GB", opts ?? { day: "numeric", month: "short", year: "numeric" }).format(d);
 }
 
-export function formatShortDate(date: Date | string): string {
-  const d = typeof date === "string" ? new Date(date) : date;
+export function formatShortDate(date: Date | string | null | undefined): string {
+  const d = validDate(date);
+  if (!d) return "—";
   return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(d);
 }
 
@@ -16,17 +24,19 @@ export function formatTodayLong(date = new Date()): string {
   }).format(date);
 }
 
-export function ageFromDOB(dob: string): number {
-  const b = new Date(dob);
+export function ageFromDOB(dob: string | null | undefined): number | null {
+  const b = validDate(dob);
+  if (!b) return null;
   const now = new Date();
   let age = now.getFullYear() - b.getFullYear();
   const m = now.getMonth() - b.getMonth();
   if (m < 0 || (m === 0 && now.getDate() < b.getDate())) age--;
-  return age;
+  return age >= 0 ? age : null;
 }
 
-export function relative(date: Date | string): string {
-  const d = typeof date === "string" ? new Date(date) : date;
+export function relative(date: Date | string | null | undefined): string {
+  const d = validDate(date);
+  if (!d) return "—";
   const diff = Date.now() - d.getTime();
   const days = Math.floor(diff / 86_400_000);
   if (days < 1) return "today";

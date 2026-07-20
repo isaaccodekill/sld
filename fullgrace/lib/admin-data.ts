@@ -23,6 +23,11 @@ export function useClients() {
 }
 
 export async function createClientRecord(input: ClientInput) {
+  if (!input.dob) throw new Error("Add the child's date of birth before saving.");
+  const parsedDob = new Date(input.dob);
+  if (Number.isNaN(parsedDob.getTime())) throw new Error("Enter a valid date of birth.");
+  if (input.dob > new Date().toISOString().slice(0, 10)) throw new Error("Date of birth cannot be in the future.");
+
   const supabase = createClient();
   const { data, error } = await supabase.from("clients").insert({
     first_name: input.firstName,
