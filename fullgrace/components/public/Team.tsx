@@ -39,13 +39,11 @@ export function Team() {
           </h2>
           <div className="prose-editorial mt-6 max-w-prose text-ink-2">
             <p>
-              I founded Fullgrace after years of seeing how much a patient plan and a carefully
-              prepared home environment could change for a child. Montessori helps me see the whole child;
-              behavioural practice gives us tools for steady progress.
+              I started Fullgrace after years of observing how effectively a structured plan can
+              help to bring about great change in the behaviour of any child.
             </p>
             <p>
               I stay close to every family, from the first conversation to each progress review.
-              Our caseload is intentionally small, so every child is known.
             </p>
           </div>
 
