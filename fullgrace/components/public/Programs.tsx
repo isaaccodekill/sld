@@ -25,7 +25,7 @@ const programs: Program[] = [
     color: "red",
   },
   {
-    title: "Self-help skills coaching",
+    title: "Self-help skills",
     blurb: "Everyday skills that grow confidence and independence.",
     rhythm: "Weekly · 45 min",
     color: "yellow",

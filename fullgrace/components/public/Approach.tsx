@@ -15,13 +15,12 @@ export function Approach() {
 
         <Reveal delay={0.06}>
           <h2 id="approach-title" className="font-display text-3xl font-medium leading-[1.1] tracking-[-0.02em] md:text-4xl">
-            Child-led. Carefully <RotatingUnderline color="red" delay={0.12}>structured.</RotatingUnderline>
+            Carefully structured <RotatingUnderline color="red" delay={0.12}>child-tailored plans.</RotatingUnderline>
           </h2>
           <div className="prose-editorial mt-6 max-w-prose text-base text-ink-2 md:text-md">
             <p>
-              Montessori creates a calm, tactile room. Behavioural practice gives each session clear
-              goals. Together, they help us meet the child where they are and make progress visible
-              to the whole family.
+              Our programs also integrate the Montessori method of education and effective
+              behavioural interventions suited to the needs of each client.
             </p>
           </div>
 

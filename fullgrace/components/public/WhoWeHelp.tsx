@@ -40,7 +40,7 @@ export function WhoWeHelp() {
         Support shaped around your child.
       </h2>
       <p className="mt-4 max-w-[56ch] text-ink-2">
-        The diagnosis can guide us. The child always leads the plan.
+        The diagnosis can guide us, but we are mindful of the demonstrated needs of the child.
       </p>
 
       <div className="mt-10 grid gap-5 md:grid-cols-3">
