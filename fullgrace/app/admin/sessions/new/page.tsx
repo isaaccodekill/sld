@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { Tag } from "@/components/ui/Tag";
-import { createId, saveSession, useAppointments } from "@/lib/admin-store";
+import { createId, saveSession, useAppointments, useSavedSessions } from "@/lib/admin-store";
+import type { SessionType } from "@/lib/mock/types";
 
 export default function NewSessionPage() {
   return (
@@ -24,9 +25,13 @@ function NewSessionInner() {
   const requestedClient = params?.get("client") ?? "";
   const preClient = requestedClient || clients[0]?.id || "";
   const appointmentId = params?.get("appointment") ?? undefined;
+  const editId = params?.get("edit") ?? "";
   const appointments = useAppointments();
+  const savedSessions = useSavedSessions();
+  const editingSession = savedSessions.find((item) => item.id === editId);
   const appointment = appointments.find((item) => item.id === appointmentId);
-  const draftId = useMemo(() => createId("session"), []);
+  const generatedId = useMemo(() => createId("session"), []);
+  const draftId = editingSession?.id ?? generatedId;
 
   const [form, setForm] = useState({
     clientId: preClient,
@@ -47,6 +52,25 @@ function NewSessionInner() {
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [done, setDone] = useState(false);
   const autosaveTimer = useRef<number | null>(null);
+  const loadedEditId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!editingSession || loadedEditId.current === editingSession.id) return;
+    loadedEditId.current = editingSession.id;
+    setForm({
+      clientId: editingSession.clientId,
+      date: editingSession.date,
+      duration: String(editingSession.durationMinutes),
+      sessionType: editingSession.sessionType as SessionType,
+      focusAreas: editingSession.focusAreas,
+      observations: editingSession.observations,
+      techniques: editingSession.techniques,
+      engagement: String(editingSession.engagement),
+      progress: editingSession.progressNotes,
+      nextSteps: editingSession.nextSteps,
+      tag: editingSession.tag,
+    });
+  }, [editingSession]);
 
   useEffect(() => {
     if (!clients.length) return;
@@ -70,15 +94,15 @@ function NewSessionInner() {
   }, [appointment, clients, requestedClient]);
 
   useEffect(() => {
-    if (done || !form.clientId) return;
+    if (done || !form.clientId || (editId && !editingSession)) return;
     autosaveTimer.current = window.setTimeout(() => {
-      saveSession({ id: draftId, appointmentId, clientId: form.clientId, date: form.date, durationMinutes: Number(form.duration), sessionType: form.sessionType, focusAreas: form.focusAreas, observations: form.observations, techniques: form.techniques, engagement: Number(form.engagement), progressNotes: form.progress, nextSteps: form.nextSteps, tag: form.tag, status: "draft", updatedAt: new Date().toISOString() });
+      saveSession({ id: draftId, appointmentId: editingSession?.appointmentId ?? appointmentId, clientId: form.clientId, date: form.date, durationMinutes: Number(form.duration), sessionType: form.sessionType, focusAreas: form.focusAreas, observations: form.observations, techniques: form.techniques, engagement: Number(form.engagement), progressNotes: form.progress, nextSteps: form.nextSteps, tag: form.tag, status: editingSession?.status ?? "draft", updatedAt: new Date().toISOString() });
       setSavedAt(Date.now());
     }, 900);
     return () => {
       if (autosaveTimer.current) window.clearTimeout(autosaveTimer.current);
     };
-  }, [appointmentId, done, draftId, form]);
+  }, [appointmentId, done, draftId, editId, editingSession, form]);
 
   const secondsAgo = useMemo(() => {
     if (!savedAt) return null;
@@ -86,12 +110,13 @@ function NewSessionInner() {
   }, [savedAt]);
 
   const client = clients.find((item) => item.id === form.clientId);
+  const finalisingDraft = !editingSession || editingSession.status === "draft";
 
   if (done) {
     return (
       <div className="mx-auto max-w-2xl rounded-xl border border-line bg-cream p-5 sm:p-8">
-        <h1 className="font-display text-2xl">Session report finalised.</h1>
-        <p className="mt-2 text-ink-2">The report is saved and the linked appointment has been marked complete.</p>
+        <h1 className="font-display text-2xl">Session report {finalisingDraft ? "finalised" : "updated"}.</h1>
+        <p className="mt-2 text-ink-2">The report is saved{finalisingDraft && (editingSession?.appointmentId || appointmentId) ? " and the linked appointment has been marked complete." : "."}</p>
         <div className="mt-5 flex gap-3">
           <Link href={`/admin/clients/${form.clientId}`} className="text-green hover:text-green-2">
             ← Back to client
@@ -116,7 +141,7 @@ function NewSessionInner() {
       </nav>
 
       <header>
-        <h1 className="font-display text-3xl font-medium">Log a session report</h1>
+        <h1 className="font-display text-3xl font-medium">{editingSession ? "Edit session report" : "Log a session report"}</h1>
         {client && (
           <p className="text-sm text-ink-2">
             for <span className="text-ink">{client.firstName}</span>
@@ -129,7 +154,7 @@ function NewSessionInner() {
         onSubmit={(e) => {
           e.preventDefault();
           if (autosaveTimer.current) window.clearTimeout(autosaveTimer.current);
-          saveSession({ id: draftId, appointmentId, clientId: form.clientId, date: form.date, durationMinutes: Number(form.duration), sessionType: form.sessionType, focusAreas: form.focusAreas, observations: form.observations, techniques: form.techniques, engagement: Number(form.engagement), progressNotes: form.progress, nextSteps: form.nextSteps, tag: form.tag, status: "final", updatedAt: new Date().toISOString() });
+          saveSession({ id: draftId, appointmentId: editingSession?.appointmentId ?? appointmentId, clientId: form.clientId, date: form.date, durationMinutes: Number(form.duration), sessionType: form.sessionType, focusAreas: form.focusAreas, observations: form.observations, techniques: form.techniques, engagement: Number(form.engagement), progressNotes: form.progress, nextSteps: form.nextSteps, tag: form.tag, status: "final", updatedAt: new Date().toISOString() });
           setDone(true);
         }}
         className="space-y-7 rounded-xl border border-line bg-cream p-4 sm:p-6 md:p-8"
@@ -245,7 +270,7 @@ function NewSessionInner() {
             Cancel
           </Link>
           <Button className="w-full sm:w-auto" type="submit" variant="primary" size="md">
-            Finalise report
+            {editingSession?.status === "final" ? "Save changes" : "Finalise report"}
           </Button>
         </div>
       </form>

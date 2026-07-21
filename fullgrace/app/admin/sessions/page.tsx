@@ -21,11 +21,11 @@ export default function SessionsPage() {
       <ol className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-white">
         {combined.map((session, index) => (
           <li data-tour={index === 0 ? "sessions-list" : undefined} key={session.id}>
-            <Link href={`/admin/clients/${session.clientId}`} className="grid grid-cols-[1fr_auto] gap-4 p-4 hover:bg-cream-2/40 md:grid-cols-[150px_1fr_160px_auto]">
+            <Link href={`/admin/sessions/new?edit=${session.id}`} aria-label={`Edit ${clients.find((item) => item.id === session.clientId)?.firstName ?? "client"} session report from ${formatDate(session.date)}`} className="grid grid-cols-[1fr_auto] gap-4 p-4 hover:bg-cream-2/40 md:grid-cols-[150px_1fr_160px_auto]">
               <div><div className="text-sm font-medium">{formatDate(session.date)}</div><div className="text-xs capitalize text-ink-3">{session.sessionType.replace("_", " ")}</div></div>
               <div><div className="font-medium">{clients.find((item) => item.id === session.clientId)?.firstName ?? "Client"}</div><div className="truncate text-xs text-ink-3">{session.focusAreas || "No focus area added"}</div></div>
               <div className="hidden truncate text-xs text-ink-2 md:block">{session.progressNotes || "Progress not recorded"}</div>
-              <Tag tone={session.status === "draft" ? "warn" : "good"}>{session.status}</Tag>
+              <div className="flex items-center gap-3"><Tag tone={session.status === "draft" ? "warn" : "good"}>{session.status}</Tag><span className="hidden text-xs font-medium text-green sm:inline">Edit →</span></div>
             </Link>
           </li>
         ))}

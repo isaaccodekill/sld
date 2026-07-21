@@ -62,6 +62,7 @@ export type AiSummary = {
 export type ProgressReport = {
   id: string;
   clientId: string;
+  title?: string;
   windowStart: string;
   windowEnd: string;
   occasionNote?: string;

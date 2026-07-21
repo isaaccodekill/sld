@@ -164,6 +164,40 @@ export async function saveReportDraft(input: {
   return data.id as string;
 }
 
+export async function updateProgressReport(input: {
+  id: string;
+  clientId: string;
+  windowStart: string;
+  windowEnd: string;
+  occasion: string;
+  title: string;
+  sections: Record<string, string>;
+}) {
+  if (!input.title.trim()) throw new Error("Add a report title before saving.");
+  if (!input.windowStart || !input.windowEnd) throw new Error("Add the report period before saving.");
+  if (input.windowStart > input.windowEnd) throw new Error("The report start date must be before its end date.");
+
+  const supabase = createClient();
+  const { error } = await supabase.from("reports").update({
+    client_id: databaseClientId(input.clientId),
+    window_start: input.windowStart,
+    window_end: input.windowEnd,
+    occasion: input.occasion || null,
+    title: input.title,
+    updated_at: new Date().toISOString(),
+  }).eq("id", input.id);
+  if (error) throw error;
+
+  const rows = Object.entries(input.sections).map(([section_key, content], position) => ({
+    report_id: input.id,
+    section_key,
+    position,
+    content,
+  }));
+  const { error: sectionError } = await supabase.from("report_sections").upsert(rows, { onConflict: "report_id,section_key" });
+  if (sectionError) throw sectionError;
+}
+
 const legacyIds: Record<string, string> = {
   c_tola: "a1000000-0000-4000-8000-000000000001",
   c_chioma: "a1000000-0000-4000-8000-000000000002",
@@ -212,6 +246,7 @@ function reportFromRow(row: Record<string, any>): ProgressReport {
   return {
     id: row.id,
     clientId: displayClientId(row.client_id),
+    title: row.title ?? undefined,
     windowStart: row.window_start,
     windowEnd: row.window_end,
     occasionNote: row.occasion ?? undefined,
