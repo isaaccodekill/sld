@@ -23,10 +23,7 @@ export function useClients() {
 }
 
 export async function createClientRecord(input: ClientInput) {
-  if (!input.dob) throw new Error("Add the child's date of birth before saving.");
-  const parsedDob = new Date(input.dob);
-  if (Number.isNaN(parsedDob.getTime())) throw new Error("Enter a valid date of birth.");
-  if (input.dob > new Date().toISOString().slice(0, 10)) throw new Error("Date of birth cannot be in the future.");
+  validateClientInput(input);
 
   const supabase = createClient();
   const { data, error } = await supabase.from("clients").insert({
@@ -53,6 +50,44 @@ export async function createClientRecord(input: ClientInput) {
     }).eq("id", input.sourceEnquiryId);
   }
   return data.id as string;
+}
+
+export async function updateClientRecord(id: string, input: ClientInput) {
+  validateClientInput(input);
+  const { error } = await createClient().from("clients").update({
+    first_name: input.firstName,
+    nickname: input.nickname || null,
+    date_of_birth: input.dob,
+    parent_name: input.parentName,
+    parent_phone: input.parentPhone || null,
+    parent_email: input.parentEmail || null,
+    relationship: input.relationship || null,
+    primary_concern: input.primaryConcern || null,
+    tags: input.tags,
+    working_hypothesis: input.workingHypothesis || null,
+    start_date: input.startDate,
+    internal_notes: input.internalNotes || null,
+    status: input.status,
+    updated_at: new Date().toISOString(),
+  }).eq("id", databaseClientId(id));
+  if (error) throw error;
+}
+
+export async function deleteClientRecord(id: string) {
+  const { error } = await createClient().rpc("delete_client_record", {
+    target_client_id: databaseClientId(id),
+  });
+  if (error) throw error;
+}
+
+function validateClientInput(input: ClientInput) {
+  if (!input.firstName.trim()) throw new Error("Add the child's first name before saving.");
+  if (!input.parentName.trim()) throw new Error("Add a parent or guardian name before saving.");
+  if (!input.dob) throw new Error("Add the child's date of birth before saving.");
+  const parsedDob = new Date(input.dob);
+  if (Number.isNaN(parsedDob.getTime())) throw new Error("Enter a valid date of birth.");
+  if (input.dob > new Date().toISOString().slice(0, 10)) throw new Error("Date of birth cannot be in the future.");
+  if (!input.startDate || Number.isNaN(new Date(input.startDate).getTime())) throw new Error("Enter a valid start date.");
 }
 
 export function useEnquiries() {

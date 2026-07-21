@@ -65,6 +65,9 @@ export default function ClientDetail({ params }: { params: { id: string } }) {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
+          <LinkButton href={`/admin/clients/${client.id}/edit`} variant="outline" size="sm">
+            Edit client
+          </LinkButton>
           <LinkButton href={`/admin/sessions/new?client=${client.id}`} variant="primary" size="sm">
             + Add session
           </LinkButton>
