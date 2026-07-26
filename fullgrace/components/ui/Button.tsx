@@ -56,9 +56,10 @@ export function LinkButton({
   iconRight,
   target,
   rel,
-}: CommonProps & { href: string; target?: string; rel?: string }) {
+  tabIndex,
+}: CommonProps & { href: string; target?: string; rel?: string; tabIndex?: number }) {
   return (
-    <Link href={href} target={target} rel={rel} className={cn(base, variants[variant], sizes[size], className)}>
+    <Link href={href} target={target} rel={rel} tabIndex={tabIndex} className={cn(base, variants[variant], sizes[size], className)}>
       {iconLeft}
       <span>{children}</span>
       {iconRight}

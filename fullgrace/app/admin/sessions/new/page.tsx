@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { Tag } from "@/components/ui/Tag";
-import { createId, saveSession, useAppointments, useSavedSessions } from "@/lib/admin-store";
+import { createId, saveAppointment, saveSession, useAppointments, useSavedSessions, type Appointment } from "@/lib/admin-store";
 import type { SessionType } from "@/lib/mock/types";
 
 export default function NewSessionPage() {
@@ -30,12 +30,15 @@ function NewSessionInner() {
   const savedSessions = useSavedSessions();
   const editingSession = savedSessions.find((item) => item.id === editId);
   const appointment = appointments.find((item) => item.id === appointmentId);
+  const linkedAppointment = appointments.find((item) => item.id === (editingSession?.appointmentId ?? appointmentId));
   const generatedId = useMemo(() => createId("session"), []);
+  const retrospectiveAppointmentId = useMemo(() => createId("appointment"), []);
   const draftId = editingSession?.id ?? generatedId;
 
   const [form, setForm] = useState({
     clientId: preClient,
-    date: appointment?.date ?? new Date().toISOString().slice(0, 10),
+    date: appointment?.date ?? "",
+    startTime: appointment?.startTime ?? "",
     duration: String(appointment?.durationMinutes ?? 45),
     sessionType: appointment?.sessionType ?? "therapy",
     focusAreas: "",
@@ -53,6 +56,7 @@ function NewSessionInner() {
   const [done, setDone] = useState(false);
   const autosaveTimer = useRef<number | null>(null);
   const loadedEditId = useRef<string | null>(null);
+  const loadedAppointmentId = useRef<string | null>(null);
 
   useEffect(() => {
     if (!editingSession || loadedEditId.current === editingSession.id) return;
@@ -60,6 +64,7 @@ function NewSessionInner() {
     setForm({
       clientId: editingSession.clientId,
       date: editingSession.date,
+      startTime: linkedAppointment?.startTime ?? "",
       duration: String(editingSession.durationMinutes),
       sessionType: editingSession.sessionType as SessionType,
       focusAreas: editingSession.focusAreas,
@@ -70,7 +75,13 @@ function NewSessionInner() {
       nextSteps: editingSession.nextSteps,
       tag: editingSession.tag,
     });
-  }, [editingSession]);
+  }, [editingSession, linkedAppointment?.startTime]);
+
+  useEffect(() => {
+    if (!linkedAppointment || loadedAppointmentId.current === linkedAppointment.id) return;
+    loadedAppointmentId.current = linkedAppointment.id;
+    setForm((current) => ({ ...current, startTime: linkedAppointment.startTime }));
+  }, [linkedAppointment]);
 
   useEffect(() => {
     if (!clients.length) return;
@@ -86,6 +97,7 @@ function NewSessionInner() {
         clientId: nextClient,
         ...(appointment ? {
           date: appointment.date,
+          startTime: appointment.startTime,
           duration: String(appointment.durationMinutes),
           sessionType: appointment.sessionType,
         } : {}),
@@ -94,7 +106,7 @@ function NewSessionInner() {
   }, [appointment, clients, requestedClient]);
 
   useEffect(() => {
-    if (done || !form.clientId || (editId && !editingSession)) return;
+    if (done || !form.clientId || !form.date || !form.startTime || (editId && !editingSession)) return;
     autosaveTimer.current = window.setTimeout(() => {
       saveSession({ id: draftId, appointmentId: editingSession?.appointmentId ?? appointmentId, clientId: form.clientId, date: form.date, durationMinutes: Number(form.duration), sessionType: form.sessionType, focusAreas: form.focusAreas, observations: form.observations, techniques: form.techniques, engagement: Number(form.engagement), progressNotes: form.progress, nextSteps: form.nextSteps, tag: form.tag, status: editingSession?.status ?? "draft", updatedAt: new Date().toISOString() });
       setSavedAt(Date.now());
@@ -116,7 +128,7 @@ function NewSessionInner() {
     return (
       <div className="mx-auto max-w-2xl rounded-xl border border-line bg-cream p-5 sm:p-8">
         <h1 className="font-display text-2xl">Session report {finalisingDraft ? "finalised" : "updated"}.</h1>
-        <p className="mt-2 text-ink-2">The report is saved{finalisingDraft && (editingSession?.appointmentId || appointmentId) ? " and the linked appointment has been marked complete." : "."}</p>
+        <p className="mt-2 text-ink-2">The report is saved, and the completed session now appears in the calendar.</p>
         <div className="mt-5 flex gap-3">
           <Link href={`/admin/clients/${form.clientId}`} className="text-green hover:text-green-2">
             ← Back to client
@@ -154,20 +166,42 @@ function NewSessionInner() {
         onSubmit={(e) => {
           e.preventDefault();
           if (autosaveTimer.current) window.clearTimeout(autosaveTimer.current);
-          saveSession({ id: draftId, appointmentId: editingSession?.appointmentId ?? appointmentId, clientId: form.clientId, date: form.date, durationMinutes: Number(form.duration), sessionType: form.sessionType, focusAreas: form.focusAreas, observations: form.observations, techniques: form.techniques, engagement: Number(form.engagement), progressNotes: form.progress, nextSteps: form.nextSteps, tag: form.tag, status: "final", updatedAt: new Date().toISOString() });
+          const finalAppointmentId = editingSession?.appointmentId ?? appointmentId ?? retrospectiveAppointmentId;
+          const calendarEntry: Appointment = {
+            id: finalAppointmentId,
+            clientId: form.clientId,
+            date: form.date,
+            startTime: form.startTime,
+            durationMinutes: Number(form.duration),
+            sessionType: form.sessionType,
+            status: "completed",
+            notes: linkedAppointment?.notes ?? "Added retrospectively from a completed session report.",
+            recurrenceGroupId: linkedAppointment?.recurrenceGroupId,
+            createdAt: linkedAppointment?.createdAt ?? new Date().toISOString(),
+          };
+          saveAppointment(calendarEntry);
+          saveSession({ id: draftId, appointmentId: finalAppointmentId, clientId: form.clientId, date: form.date, durationMinutes: Number(form.duration), sessionType: form.sessionType, focusAreas: form.focusAreas, observations: form.observations, techniques: form.techniques, engagement: Number(form.engagement), progressNotes: form.progress, nextSteps: form.nextSteps, tag: form.tag, status: "final", updatedAt: new Date().toISOString() });
           setDone(true);
         }}
         className="space-y-7 rounded-xl border border-line bg-cream p-4 sm:p-6 md:p-8"
       >
-        <div className="grid gap-5 md:grid-cols-3">
+        <section className="rounded-xl border border-green/15 bg-white p-4 sm:p-5">
+          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-green-2">When did this session happen?</p>
+          <p className="mt-1 text-xs text-ink-3">This creates a completed entry in the calendar when you finalise the report.</p>
+          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+            <Input label="Session date" type="date" max={new Date().toISOString().slice(0, 10)} value={form.date} onChange={(e) => set("date", e.target.value)} required />
+            <Input label="Start time" type="time" min="09:00" max="17:00" step="900" value={form.startTime} onChange={(e) => set("startTime", e.target.value)} required />
+            <Input label="Duration (min)" type="number" min={5} max={180} value={form.duration} onChange={(e) => set("duration", e.target.value)} required />
+          </div>
+        </section>
+
+        <div className="grid gap-5 md:grid-cols-2">
           <Select
             label="Client"
             value={form.clientId}
             onChange={(e) => set("clientId", e.target.value)}
             options={clients.map((c) => ({ label: `${c.firstName} (${c.tags.join(", ")})`, value: c.id }))}
           />
-          <Input label="Date" type="date" value={form.date} onChange={(e) => set("date", e.target.value)} required />
-          <Input label="Duration (min)" type="number" min={5} max={180} value={form.duration} onChange={(e) => set("duration", e.target.value)} />
           <Select
             label="Session type"
             value={form.sessionType}

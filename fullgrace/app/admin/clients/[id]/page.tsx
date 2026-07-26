@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { tagLabel } from "@/lib/mock";
 import { ageFromDOB, formatDate, formatShortDate, relative } from "@/lib/format";
@@ -9,7 +10,7 @@ import { Chip } from "@/components/ui/Chip";
 import { LinkButton } from "@/components/ui/Button";
 import { SessionTimeline } from "@/components/admin/SessionTimeline";
 import { useClients, useReports } from "@/lib/admin-data";
-import { useSavedSessions } from "@/lib/admin-store";
+import { useSavedSessions, type SavedSession } from "@/lib/admin-store";
 import type { SessionNote } from "@/lib/mock/types";
 
 export default function ClientDetail({ params }: { params: { id: string } }) {
@@ -124,39 +125,7 @@ export default function ClientDetail({ params }: { params: { id: string } }) {
           ) : (
             <ol className="space-y-3">
               {theirSessions.map((s) => (
-                <li key={s.id}>
-                  <details className="group rounded-xl border border-line bg-cream open:shadow-[0_0_0_1px_rgba(47,93,58,0.08)]">
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-left">
-                      <div className="flex items-center gap-3">
-                        <Tag tone={s.tag === "good" ? "good" : s.tag === "challenging" ? "warn" : "admin"}>
-                          {s.tag}
-                        </Tag>
-                        <div>
-                          <div className="text-sm font-medium text-ink">{formatDate(s.date, { day: "numeric", month: "long", year: "numeric" })} · {s.sessionType.replace("_", " ")}</div>
-                          <div className="text-xs text-ink-3">{s.focusAreas}</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4 text-xs text-ink-3">
-                        <span>{s.durationMinutes} min</span>
-                        <span>Engagement {s.engagement}/5</span>
-                        <span className="transition-transform group-open:rotate-45">+</span>
-                      </div>
-                    </summary>
-                    <div className="space-y-4 border-t border-line px-5 py-4">
-                      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
-                        <Tag tone={s.status === "draft" ? "warn" : "good"}>{s.status}</Tag>
-                        <div className="flex gap-2">
-                          <LinkButton href={`/admin/sessions/${s.id}`} variant="outline" size="sm">View full report</LinkButton>
-                          <LinkButton href={`/admin/sessions/new?edit=${s.id}`} size="sm">Edit report</LinkButton>
-                        </div>
-                      </div>
-                      <Field label="Observations">{s.observations}</Field>
-                      {s.techniques && <Field label="Techniques">{s.techniques}</Field>}
-                      <Field label="Progress">{s.progressNotes}</Field>
-                      <Field label="Next steps">{s.nextSteps}</Field>
-                    </div>
-                  </details>
-                </li>
+                <li key={s.id}><ClientSessionAccordion session={s} /></li>
               ))}
             </ol>
           )}
@@ -207,6 +176,47 @@ export default function ClientDetail({ params }: { params: { id: string } }) {
         </TabPanel>
       </Tabs>
     </div>
+  );
+}
+
+function ClientSessionAccordion({ session }: { session: SavedSession }) {
+  const [expanded, setExpanded] = useState(false);
+  const panelId = `session-${session.id}-details`;
+
+  return (
+    <article className={`overflow-hidden rounded-xl border bg-cream transition-[border-color,box-shadow] duration-300 ${expanded ? "border-green/35 shadow-[0_8px_30px_rgba(47,93,58,0.08)]" : "border-line hover:border-green/25"}`}>
+      <button type="button" aria-expanded={expanded} aria-controls={panelId} onClick={() => setExpanded((value) => !value)} className="group flex w-full cursor-pointer items-center justify-between gap-3 px-4 py-4 text-left sm:px-5">
+        <div className="flex min-w-0 items-center gap-3">
+          <Tag tone={session.tag === "good" ? "good" : session.tag === "challenging" ? "warn" : "admin"}>{session.tag}</Tag>
+          <div className="min-w-0">
+            <div className="text-sm font-medium text-ink">{formatDate(session.date, { day: "numeric", month: "long", year: "numeric" })} · {session.sessionType.replace("_", " ")}</div>
+            <div className="truncate text-xs text-ink-3">{session.focusAreas || "No focus area recorded"}</div>
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+          <div className="hidden text-right text-xs text-ink-3 sm:block"><span>{session.durationMinutes} min</span><span className="ml-3">Engagement {session.engagement}/5</span></div>
+          <span className="hidden text-xs font-medium text-green md:inline">{expanded ? "Hide details" : "View details"}</span>
+          <span aria-hidden className={`flex h-8 w-8 items-center justify-center rounded-full border border-green/20 bg-white text-lg text-green transition-transform duration-300 ${expanded ? "rotate-45" : "group-hover:scale-105"}`}>+</span>
+        </div>
+      </button>
+      <div id={panelId} aria-hidden={!expanded} className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+        <div className="overflow-hidden">
+          <div className="space-y-4 border-t border-line px-4 py-4 sm:px-5">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
+              <div className="flex items-center gap-3"><Tag tone={session.status === "draft" ? "warn" : "good"}>{session.status}</Tag><span className="text-xs text-ink-3 sm:hidden">{session.durationMinutes} min · Engagement {session.engagement}/5</span></div>
+              <div className="flex flex-wrap gap-2">
+                <LinkButton tabIndex={expanded ? undefined : -1} href={`/admin/sessions/${session.id}`} variant="outline" size="sm">View full report</LinkButton>
+                <LinkButton tabIndex={expanded ? undefined : -1} href={`/admin/sessions/new?edit=${session.id}`} size="sm">Edit report</LinkButton>
+              </div>
+            </div>
+            <Field label="Observations">{session.observations}</Field>
+            {session.techniques && <Field label="Techniques">{session.techniques}</Field>}
+            <Field label="Progress">{session.progressNotes}</Field>
+            <Field label="Next steps">{session.nextSteps}</Field>
+          </div>
+        </div>
+      </div>
+    </article>
   );
 }
 
