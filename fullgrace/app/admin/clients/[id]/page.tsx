@@ -143,6 +143,13 @@ export default function ClientDetail({ params }: { params: { id: string } }) {
                       </div>
                     </summary>
                     <div className="space-y-4 border-t border-line px-5 py-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
+                        <Tag tone={s.status === "draft" ? "warn" : "good"}>{s.status}</Tag>
+                        <div className="flex gap-2">
+                          <LinkButton href={`/admin/sessions/${s.id}`} variant="outline" size="sm">View full report</LinkButton>
+                          <LinkButton href={`/admin/sessions/new?edit=${s.id}`} size="sm">Edit report</LinkButton>
+                        </div>
+                      </div>
                       <Field label="Observations">{s.observations}</Field>
                       {s.techniques && <Field label="Techniques">{s.techniques}</Field>}
                       <Field label="Progress">{s.progressNotes}</Field>
