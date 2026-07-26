@@ -16,11 +16,11 @@ export function LogoMark({ size = 40, className }: { size?: number; className?: 
 
 export function LogoLockup({ className }: { className?: string }) {
   return (
-    <div className={cn("flex items-center gap-2.5", className)}>
-      <LogoMark size={36} />
+    <div className={cn("flex items-center gap-3", className)}>
+      <LogoMark size={44} />
       <div className="leading-tight">
-        <div className="font-display text-base text-ink">Fullgrace</div>
-        <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink-3">Therapy & Learning</div>
+        <div className="font-display text-lg text-ink">Fullgrace</div>
+        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-3">Therapy & Learning</div>
       </div>
     </div>
   );

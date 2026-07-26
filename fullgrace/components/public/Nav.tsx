@@ -37,7 +37,7 @@ export function Nav() {
           scrolled ? "border-b border-line bg-cream/85 backdrop-blur-md" : "bg-transparent",
         )}
       >
-        <div className="mx-auto flex h-16 max-w-wide items-center justify-between px-5 md:h-20 md:px-8">
+        <div className="mx-auto flex h-[72px] max-w-wide items-center justify-between px-5 md:h-[88px] md:px-8">
           <Link href="/" aria-label="Fullgrace home" className="-my-2">
             <LogoLockup />
           </Link>

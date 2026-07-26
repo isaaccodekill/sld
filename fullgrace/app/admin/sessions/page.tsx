@@ -53,13 +53,12 @@ function ClientSessionGroup({ clientId, clientName, sessions, tour = false }: { 
       </header>
       <ol className="divide-y divide-line">
         {sessions.map((session) => (
-          <li key={session.id} className="grid gap-3 p-4 sm:grid-cols-[140px_minmax(0,1fr)_auto] sm:items-center sm:px-5">
-            <div><div className="text-sm font-medium">{formatDate(session.date)}</div><div className="text-xs capitalize text-ink-3">{session.sessionType.replace("_", " ")} · {session.durationMinutes} min</div></div>
+          <li key={session.id} className="grid gap-4 p-4 transition-colors hover:bg-cream-2/25 sm:grid-cols-[170px_minmax(0,1fr)_auto] sm:items-center sm:px-5 sm:py-5">
+            <div><div className="flex flex-wrap items-center gap-2"><span className="text-sm font-semibold">{formatDate(session.date)}</span><Tag tone={session.status === "draft" ? "warn" : "good"}>{session.status}</Tag></div><div className="mt-1 text-xs capitalize text-ink-3">{session.sessionType.replace("_", " ")} · {session.durationMinutes} min</div></div>
             <div className="min-w-0"><p className="truncate text-sm text-ink-2">{session.focusAreas || "No focus area added"}</p><p className="mt-1 truncate text-xs text-ink-3">{session.progressNotes || "Progress not recorded"}</p></div>
-            <div className="flex items-center justify-between gap-2 sm:justify-end">
-              <Tag tone={session.status === "draft" ? "warn" : "good"}>{session.status}</Tag>
-              <Link href={`/admin/sessions/${session.id}`} className="inline-flex min-h-10 items-center rounded-lg border border-line px-3 text-sm font-medium text-ink hover:border-green hover:text-green">View</Link>
-              <Link href={`/admin/sessions/new?edit=${session.id}`} className="inline-flex min-h-10 items-center rounded-lg bg-green px-3 text-sm font-medium text-white hover:bg-green-2">Edit</Link>
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+              <LinkButton href={`/admin/sessions/${session.id}`} variant="outline" size="sm" className="min-w-[96px]">View</LinkButton>
+              <LinkButton href={`/admin/sessions/new?edit=${session.id}`} size="sm" className="min-w-[96px]">Edit</LinkButton>
             </div>
           </li>
         ))}

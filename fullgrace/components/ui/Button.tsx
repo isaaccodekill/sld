@@ -15,7 +15,7 @@ type CommonProps = {
 };
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-[9999px] font-medium tracking-[-0.01em] transition-all duration-180 ease-soft select-none disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 rounded-[9999px] font-semibold tracking-[-0.01em] shadow-[0_1px_2px_rgba(23,35,45,0.06)] transition-all duration-180 ease-soft select-none active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-50";
 
 const variants: Record<Variant, string> = {
   primary:
@@ -23,13 +23,13 @@ const variants: Record<Variant, string> = {
   ghost:
     "bg-transparent text-ink hover:bg-cream-2 focus-visible:outline-ink",
   outline:
-    "bg-transparent text-ink border border-ink/15 hover:border-ink/40 hover:bg-cream-2",
+    "border border-line bg-white text-ink hover:border-green/35 hover:bg-green-3/35 hover:text-green-2 focus-visible:outline-green",
   black:
     "bg-brandblack text-cream hover:bg-ink focus-visible:outline-brandblack",
 };
 
 const sizes: Record<Size, string> = {
-  sm: "h-9 px-4 text-sm",
+  sm: "h-10 px-5 text-sm",
   md: "h-11 px-5 text-base",
   lg: "h-14 px-7 text-md",
 };

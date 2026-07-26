@@ -20,7 +20,7 @@ export function AdminSidebar({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <aside className="flex h-full w-full flex-col bg-cream">
-      <div className="px-5 py-5">
+      <div className="px-5 py-6">
         <Link href="/admin" onClick={onNavigate} className="inline-block" aria-label="Fullgrace admin">
           <LogoLockup />
         </Link>

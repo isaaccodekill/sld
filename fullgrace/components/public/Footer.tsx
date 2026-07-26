@@ -59,9 +59,9 @@ export function Footer() {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <div className="flex items-center gap-3">
-              <LogoMark size={44} />
+              <LogoMark size={52} />
               <div>
-                <div className="font-display text-lg">{BUSINESS_NAME}</div>
+                <div className="font-display text-xl">{BUSINESS_NAME}</div>
                 <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-3">
                   Lagos · Nigeria
                 </div>

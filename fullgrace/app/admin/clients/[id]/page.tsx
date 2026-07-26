@@ -205,8 +205,8 @@ function ClientSessionAccordion({ session }: { session: SavedSession }) {
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
               <div className="flex items-center gap-3"><Tag tone={session.status === "draft" ? "warn" : "good"}>{session.status}</Tag><span className="text-xs text-ink-3 sm:hidden">{session.durationMinutes} min · Engagement {session.engagement}/5</span></div>
               <div className="flex flex-wrap gap-2">
-                <LinkButton tabIndex={expanded ? undefined : -1} href={`/admin/sessions/${session.id}`} variant="outline" size="sm">View full report</LinkButton>
-                <LinkButton tabIndex={expanded ? undefined : -1} href={`/admin/sessions/new?edit=${session.id}`} size="sm">Edit report</LinkButton>
+                <LinkButton tabIndex={expanded ? undefined : -1} href={`/admin/sessions/${session.id}`} variant="outline" size="sm" className="min-w-[132px]">View full report</LinkButton>
+                <LinkButton tabIndex={expanded ? undefined : -1} href={`/admin/sessions/new?edit=${session.id}`} size="sm" className="min-w-[112px]">Edit report</LinkButton>
               </div>
             </div>
             <Field label="Observations">{session.observations}</Field>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useClients, useReports } from "@/lib/admin-data";
 import { formatDate, relative } from "@/lib/format";
 import { Tag } from "@/components/ui/Tag";
+import { LinkButton } from "@/components/ui/Button";
 
 export default function ReportsPage() {
   const { clients } = useClients();
@@ -66,9 +67,9 @@ export default function ReportsPage() {
                     )}
                   </td>
                   <td className="p-3 text-right">
-                    <Link href={`/admin/reports/${r.id}`} className="text-green hover:text-green-2">
-                      Open →
-                    </Link>
+                    <LinkButton href={`/admin/reports/${r.id}`} variant="outline" size="sm" className="min-w-[96px]">
+                      View report
+                    </LinkButton>
                   </td>
                 </tr>
               );

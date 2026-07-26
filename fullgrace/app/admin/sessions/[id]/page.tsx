@@ -23,13 +23,13 @@ export default function SessionReportPage() {
     <div className="mx-auto max-w-4xl space-y-5">
       <nav className="flex flex-wrap items-center justify-between gap-3">
         <Link href="/admin/sessions" className="text-sm text-ink-3 hover:text-ink">← Session reports</Link>
-        <div className="flex items-center gap-2"><Tag tone={session.status === "draft" ? "warn" : "good"}>{session.status}</Tag><LinkButton href={`/admin/sessions/new?edit=${session.id}`} size="sm">Edit report</LinkButton></div>
+        <LinkButton href={`/admin/sessions/new?edit=${session.id}`} size="sm" className="min-w-[120px]">Edit report</LinkButton>
       </nav>
 
       <article className="overflow-hidden rounded-2xl border border-line bg-white shadow-[0_18px_60px_rgba(23,35,45,.05)]">
         <header className="border-b border-line bg-cream-2/40 p-5 sm:p-7">
           <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-green">Session report</p>
-          <h1 className="mt-2 font-display text-3xl sm:text-4xl">{client?.firstName ?? "Client"}</h1>
+          <div className="mt-2 flex flex-wrap items-center gap-3"><h1 className="font-display text-3xl sm:text-4xl">{client?.firstName ?? "Client"}</h1><Tag tone={session.status === "draft" ? "warn" : "good"}>{session.status}</Tag></div>
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-ink-2">
             <span>{formatDate(session.date, { day: "numeric", month: "long", year: "numeric" })}</span>
             <span className="capitalize">{session.sessionType.replace("_", " ")}</span>
